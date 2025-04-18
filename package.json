@@ -1,5 +1,5 @@
 {
-  "name": "nsc-website",
+  "name": "nsc-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "googleapis": "^148.0.0",
     "lucide-react": "^0.486.0",
+    "natural": "^8.0.1",
     "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
