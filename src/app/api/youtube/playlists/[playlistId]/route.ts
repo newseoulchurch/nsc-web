@@ -21,8 +21,8 @@ type PlaylistDetailResult = {
 
 const MAX_PLAYLIST_ITEM_RESULTS = 5;
 
-export async function  GET(req: NextRequest, { params }: { params: { playlistId: string } }) {
-  const { playlistId } = params;
+export async function  GET(req: NextRequest, { params }: { params: Promise<{ playlistId: string }> }) {
+  const { playlistId } = await params;
 
   if (!playlistId || typeof playlistId !== 'string') {
     return NextResponse.json({ error: 'Missing or invalid playlistId' }, { status: 400 });

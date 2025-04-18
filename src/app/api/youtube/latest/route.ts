@@ -1,6 +1,6 @@
 import { google, youtube_v3 } from 'googleapis';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
 const youtube = google.youtube({
   version: 'v3',
@@ -16,7 +16,7 @@ type LatestVideoResult = {
 
 const MAX_LATEST_VIDEO_RESULTS = 10;
 
-export async function GET(req: NextApiRequest, res: NextApiResponse<LatestVideoResult[] | { error: string }>) {
+export async function GET(req: NextRequest) {
   try {
     const channelResponse = await youtube.channels.list({
       part: ['contentDetails'],

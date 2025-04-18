@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function loginPage() {
   const [id, setId] = useState("")
   const [password, setPassword] = useState("")
-  document.cookie = `adminToken=mock-admin-token; path=/; max-age=3600`
+
+  useEffect(() => {
+    document.cookie = `adminToken=mock-admin-token; path=/; max-age=3600`
+  }, [])
 
   const handleLogin = async () => {
     try {
