@@ -23,7 +23,10 @@ export default function EventsPage() {
   };
 
   const renderEventCard = (data: TEvents, i: number) => (
-    <article key={i} className="min-w-[280px] sm:w-[327px] flex-shrink-0">
+    <article
+      key={i}
+      className="mt-8 sm:mt-[33px]min-w-[280px] sm:w-[327px] flex-shrink-0"
+    >
       <div
         className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
         style={{
@@ -70,7 +73,7 @@ export default function EventsPage() {
           />
         </div>
       </section>
-      <div className=" flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
+      <div className="mt-8 sm:mt-[33px] flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
         {(upcomingEvents || []).map((data, i) => (
           <article key={i} className="min-w-[280px] sm:w-[327px] flex-shrink-0">
             <div
