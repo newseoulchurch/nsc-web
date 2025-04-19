@@ -3,6 +3,7 @@
 import UpdateBlocker from "@/components/UpdateBlocker";
 import { useIsOpen } from "@/hooks/useIsOpen.ts";
 import { TEvents } from "@/types/events";
+import { TYoutubeVideo } from "@/types/youtube";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 // import "./globals.css";
@@ -28,22 +29,25 @@ export default function Home() {
   ];
   const isOpen = useIsOpen();
 
-  const [youtubeData, setYoutubeData] = useState();
+  const [youtubeData, setYoutubeData] = useState<TYoutubeVideo[]>([]);
   const [eventsData, setEventsData] = useState<TEvents[]>();
+
+  const parts = youtubeData[0].title.split(/[\]|\:]/);
+
   async function getYoutubeData() {
     try {
       const res = await fetch("/api/youtube/latest");
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error.message);
-      const videos = data.items.map((item: any) => ({
-        title: item.snippet.title,
-        videoId: item.id.videoId,
-        thumbnail: item.snippet.thumbnails.medium.url,
-        publishedAt: item.snippet.publishedAt,
+      const videos = data.map((item: any) => ({
+        title: item.title,
+        videoId: item.id,
+        videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
+        thumbnail: item.thumbnail,
+        publishedAt: item.publishedAt,
       }));
 
-      // setYoutubeData(videos);
+      setYoutubeData(videos.slice(0, 3));
     } catch (error) {
       console.error("Failed to fetch YouTube data:", error);
       return [];
@@ -57,7 +61,7 @@ export default function Home() {
   }
   useEffect(() => {
     // TODO: server 작업후
-    // getYoutubeData();
+    getYoutubeData();
     getEvents();
   }, []);
   return (
@@ -81,12 +85,15 @@ export default function Home() {
 
             {/* 🔹 Content Overlay */}
             <div className="relative z-10 text-white">
-              {/* TODO:Youtube api 최근 설교 불러오기 */}
-              <h1 className="text-h1 font-bold">BLIND SPOTS</h1>
-              <p className="mt-[22px] text-[18px] leading-[100%]">
+              <h1 className="text-h1 font-bold">
+                {parts[0].trim()}]
+                <br />
+                {parts[1]?.trim()}
+              </h1>
+              {/* <p className="mt-[22px] text-[18px] leading-[100%]">
                 THE BLIND SPOTS IN OUR LIVES THAT
                 <br /> STOP US FROM REFLECTING GOD’S GLORY
-              </p>
+              </p> */}
 
               <a
                 href="https://www.youtube.com/@newseoulchurch" // ← 여기에 교회 채널 주소 넣으세요
@@ -250,21 +257,19 @@ export default function Home() {
               </div>
 
               <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
-                {testSermonData.map((data, i) => (
+                {(youtubeData.slice(0, 3) || []).map((data, i) => (
                   <article
                     key={i}
                     className="w-full lg:w-[390px] flex-shrink-0"
                   >
-                    <div className="w-full h-[219px] bg-gray5 rounded-[12px]" />
+                    <img
+                      src={data.thumbnail}
+                      alt="Thumbnail"
+                      className="w-full h-[219px] bg-gray5 rounded-[12px]"
+                    />
                     <p className="mt-[10px] text-base font-medium">
                       {data.title}
                     </p>
-                    <time
-                      className="mt-[4px] text-lightGray text-sm"
-                      dateTime={data.date}
-                    >
-                      {data.date}
-                    </time>
                   </article>
                 ))}
               </div>
