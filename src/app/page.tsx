@@ -68,7 +68,7 @@ export default function Home() {
             {/* 🔹 Content Overlay */}
             <div className="relative z-10 text-white">
               <h1 className="text-h1 font-bold">
-                {parts[0]?.trim().startsWith('[') ? parts[0].trim() + ']' : parts[0].trim()}
+                {parts[0]?.trim().startsWith('[') ? parts[0]?.trim() + ']' : parts[0]?.trim()}
                 <br />
                 {parts[1]?.trim()}
               </h1>
