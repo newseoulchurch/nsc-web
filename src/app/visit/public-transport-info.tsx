@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 
 export default function PublicTransportInfo() {
   const publicTransportation = [
@@ -17,23 +17,27 @@ export default function PublicTransportInfo() {
       description:
         "Take [Seocho 17 Bus] in front of Exit 1 of Sadang Station and go 1 stop. Get off at Dongdeok Girl’s High School and walk for 5 minutes.",
     },
-  ]
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="text-left text-2xl font-bold uppercase">
         Public Transportation
       </div>
 
-      <div className="text-left flex flex-col gap-4 text-lg w-full md:w-[905px]">
+      <div className="text-left flex flex-col gap-4 text-base sm:text-lg w-full max-w-[905px]">
         {publicTransportation.map((station, i) => (
-          <div key={i} className="flex flex-row items-start gap-0">
-            <div className="text-lg font-semibold max-w-[250px] w-[250px] uppercase text-nowrap">
+          <div
+            key={i}
+            className="flex flex-col sm:flex-row items-start gap-2 sm:gap-0"
+          >
+            <div className="font-semibold uppercase sm:w-[250px] text-nowrap">
               {station.name}
             </div>
-            <div className="text-lg w-full">{station.description}</div>
+            <div className="">{station.description}</div>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

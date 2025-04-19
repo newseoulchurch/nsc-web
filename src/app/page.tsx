@@ -1,7 +1,10 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useEffect, useState } from "react"
+import UpdateBlocker from "@/components/UpdateBlocker";
+import { useIsOpen } from "@/hooks/useIsOpen.ts";
+import { getEventListeners } from "events";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 // import "./globals.css";
 
 export default function Home() {
@@ -25,7 +28,7 @@ export default function Home() {
       title: "Baptism",
       date: "Feb 23",
     },
-  ]
+  ];
   let testSermonData = [
     {
       title: "Discipleship Training",
@@ -43,33 +46,44 @@ export default function Home() {
       date: "Feb 23, 2025",
       url: "https://youtu.be/PD4aYDCQXRI?feature=shared",
     },
-  ]
+  ];
+  const isOpen = useIsOpen();
 
-  const [youtubeData, setYoutubeData] = useState()
+  if (!isOpen) return <UpdateBlocker />;
+  const [youtubeData, setYoutubeData] = useState();
+  const [eventsData, setEventsData] = useState();
   async function getYoutubeData() {
     try {
-      const res = await fetch("/api/youtube/latest")
-      const data = await res.json()
+      const res = await fetch("/api/youtube/latest");
+      const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error.message)
+      if (!res.ok) throw new Error(data.error.message);
       const videos = data.items.map((item: any) => ({
         title: item.snippet.title,
         videoId: item.id.videoId,
         thumbnail: item.snippet.thumbnails.medium.url,
         publishedAt: item.snippet.publishedAt,
-      }))
+      }));
 
       // setYoutubeData(videos);
     } catch (error) {
-      console.error("Failed to fetch YouTube data:", error)
-      return []
+      console.error("Failed to fetch YouTube data:", error);
+      return [];
     }
   }
-
+  // TODO
+  async function getEvents() {
+    const res = await fetch("/api/events");
+    const data = await res.json();
+    console.log("///res", res);
+    console.log("data///", data);
+    setEventsData(data);
+  }
   useEffect(() => {
     // TODO: server 작업후
     // getYoutubeData();
-  }, [])
+    // getEvents();
+  }, []);
   return (
     <main>
       {/* Hero Section */}
@@ -82,7 +96,7 @@ export default function Home() {
           muted
           playsInline
           preload="metadata"
-          src="/assets/videos/main-sermon-clip.mp4"
+          src="/assets/videos/main-sermon.mp4"
         />
 
         {/* 🔹 Content Overlay */}
@@ -107,10 +121,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-[68px] mb-[61px] px-4 lg:px-[54px]">
+      <section className="mt-[68px] mb-[61px] px-4  lg:px-[54px]">
         {/* Sunday Service */}
         <div
-          className="h-[300px] sm:h-[376px] rounded-[14px] flex flex-col items-center justify-center text-center bg-cover bg-center"
+          className="h-[300px] sm:h-[376px]  rounded-[14px] flex flex-col items-center justify-center text-center bg-cover bg-center"
           style={{
             backgroundImage: "url('/assets/images/main-back-image1.jpeg')",
           }}
@@ -118,7 +132,7 @@ export default function Home() {
           <h2 className="text-2xl sm:text-h2 font-bold text-white">
             JOIN US SUNDAY
           </h2>
-          <div className="w-full max-w-[486px] h-[auto] sm:h-[64px] mt-[30px] sm:mt-[51px] bg-white rounded-[12px] flex flex-col sm:flex-row items-center justify-center px-4 py-2 sm:py-0">
+          <div className="max-w-[486px] h-[auto] sm:h-[64px] mt-[30px] sm:mt-[51px] sm:mx-[10px] bg-white rounded-[12px] flex flex-col sm:flex-row items-center justify-center px-[57px] py-2 sm:py-0">
             <div className="flex items-center mb-2 sm:mb-0">
               <img
                 src="/assets/images/svg/time.svg"
@@ -165,7 +179,7 @@ export default function Home() {
           </div>
 
           {/* Slide */}
-          <div className="flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
+          <div className=" flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
             {testData.map((data, i) => (
               <article
                 key={i}
@@ -192,11 +206,12 @@ export default function Home() {
           </div>
         </section>
         <section>
-          <div className="mt-[85px] relative">
+          {/* TODO : after open */}
+          {/* <div className="mt-[85px] relative">
             <div className=" flex justify-center items-center ">
               <h3 className="text-h3 font-bold">SEARCH PASTOR’s MESSAGE</h3>
-            </div>
-          </div>
+            </div> 
+          </div> 
           <div className="mt-[25px] flex justify-center items-center">
             <div className="w-[616px] h-[53px] pl-[18px] flex justify-start  items-center bg-gray5 rounded-[17px]">
               <img src="/assets/images/svg/zoom-icon.svg" />
@@ -206,10 +221,10 @@ export default function Home() {
                 className="ml-[29px] w-full bg-transparent border-none outline-none "
               />
             </div>
-          </div>
+          </div> */}
 
-          <div className="mt-[26px] justify-center items-center flex overflow-x-auto scroll-smooth thin-scrollbar">
-            {/* TODO: 추천,태그 검색 후 불러오기 */}
+          {/* TODO: 추천,태그 검색 후 불러오기 */}
+          {/* <div className="mt-[26px] justify-center items-center flex overflow-x-auto scroll-smooth thin-scrollbar">
           </div>
           <div className="flex justify-center">
             {[
@@ -223,18 +238,19 @@ export default function Home() {
                 <button className="py-[8px] px-[14px] mr-[16px] text-gray-600 border border-gray-100 rounded-[8px] cursor-pointer hover:bg-gray-100 transition">
                   {data}
                 </button>
-              )
+              );
             })}
-          </div>
+          </div> */}
         </section>
         <section>
-          <div className="mt-[64px] relative">
-            <div className=" flex  justify-center items-center ">
+          <div className="mt-[64px] relative flex flex-col">
+            <div className="flex justify-center items-center">
               <h3 className="text-h3 font-bold">LATEST MESSAGE</h3>
             </div>
-            {/* TODO: 반응형일때 겹침 */}
-            <button className="mt-[23px]  flex items-center absolute top-[-10px] right-[54px]">
-              <span className="mr-[14px] text-sm leading-[100%] tracking-[0.1rem]">
+
+            {/* ✅ 모바일: 아래에 배치, 데스크탑: 오른쪽 상단 고정 */}
+            <button className="mt-[16px]  flex items-center justify-center lg:absolute lg:top-[-10px] lg:right-[54px]">
+              <span className="mr-[14px]  text-sm leading-[100%] tracking-[0.1rem]">
                 SEE MORE
               </span>
               <img
@@ -245,10 +261,10 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="mt-[26px] justify-center items-center flex overflow-x-auto scroll-smooth thin-scrollbar">
+          <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
             {testSermonData.map((data, i) => (
-              <article key={i} className="mr-[8px] flex-shrink-0">
-                <div className="w-[390px] h-[219px] bg-gray5 rounded-[12px] " />
+              <article key={i} className="w-full lg:w-[390px] flex-shrink-0">
+                <div className="w-full h-[219px] bg-gray5 rounded-[12px]" />
                 <p className="mt-[10px] text-base font-medium">{data.title}</p>
                 <time
                   className="mt-[4px] text-lightGray text-sm"
@@ -274,14 +290,14 @@ export default function Home() {
             <div className="flex mt-[39px] ">
               <Link
                 href={"/about"}
-                className="py-2 px-[14px] mr-[12px] border border-white border-[1.5px] rounded-[8px] text-button text-white  tracking-[0.1rem] "
+                className="py-2 px-[14px] mr-[12px] border border-white border-[1.5px] rounded-[8px] text-button text-white  tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
                 aria-label="about us"
               >
                 ABOUT US
               </Link>
               <Link
                 href={"/beliefs"}
-                className="py-2 px-[14px] border border-white border-[1.5px] rounded-[8px] text-button text-white  tracking-[0.1rem]"
+                className="py-2 px-[14px] border border-white border-[1.5px] rounded-[8px] text-button text-white  tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
                 aria-label="our beliefs"
               >
                 OUR BELIEFS
@@ -292,5 +308,5 @@ export default function Home() {
       </section>
       {/* </div> */}
     </main>
-  )
+  );
 }
