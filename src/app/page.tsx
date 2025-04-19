@@ -9,24 +9,6 @@ import { useEffect, useState } from "react";
 // import "./globals.css";
 
 export default function Home() {
-  let testSermonData = [
-    {
-      title: "Discipleship Training",
-      date: "Feb 23, 2025",
-      url: "https://youtu.be/D50eTekDsDY?feature=shared",
-    },
-    {
-      title: "Easter Sunday",
-      date: "Feb 23, 2025",
-      url: "https://youtu.be/kwsKd-UK4oI?feature=shared",
-    },
-
-    {
-      title: "Baptism",
-      date: "Feb 23, 2025",
-      url: "https://youtu.be/PD4aYDCQXRI?feature=shared",
-    },
-  ];
   const isOpen = useIsOpen();
 
   const [youtubeData, setYoutubeData] = useState<TYoutubeVideo[]>([]);
@@ -86,7 +68,7 @@ export default function Home() {
             {/* 🔹 Content Overlay */}
             <div className="relative z-10 text-white">
               <h1 className="text-h1 font-bold">
-                {parts[0]?.trim()}]
+                {parts[0]?.trim().startsWith('[') ? parts[0].trim() + ']' : parts[0].trim()}
                 <br />
                 {parts[1]?.trim()}
               </h1>
@@ -268,15 +250,21 @@ export default function Home() {
                     key={i}
                     className="w-full lg:w-[390px] flex-shrink-0"
                   >
-                    <img
-                      src={data.thumbnail}
-                      alt="Thumbnail"
-                      className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
-                      height={'219px'}
-                    />
-                    <p className="mt-[10px] text-base font-medium">
-                      {data.title}
-                    </p>
+                    <a
+                      href={data.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={data.thumbnail}
+                        alt="Thumbnail"
+                        className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
+                        height={'219px'}
+                      />
+                      <p className="mt-[10px] text-base font-medium">
+                        {data.title}
+                      </p>
+                    </a>
                   </article>
                 ))}
               </div>
