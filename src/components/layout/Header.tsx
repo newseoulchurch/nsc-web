@@ -14,7 +14,7 @@ export default function Header() {
   const isDarkHeader = ["/sermons"].includes(pathname);
   const isOpen = useIsOpen();
 
-  if (!isOpen) return <UpdateBlocker />;
+  if (!!isOpen) return <UpdateBlocker />;
 
   const bgClass = isDarkHeader ? "bg-black" : "bg-white";
   const logoSrc = isDarkHeader

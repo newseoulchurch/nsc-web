@@ -2,18 +2,11 @@
 
 import UpdateBlocker from "@/components/UpdateBlocker";
 import { useIsOpen } from "@/hooks/useIsOpen.ts";
-import { getEventListeners } from "events";
+import { TEvents } from "@/types/events";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 // import "./globals.css";
 
-type TEvents = {
-  date: string;
-  img_url: string;
-  status: string;
-  time: string;
-  title: string;
-};
 export default function Home() {
   let testSermonData = [
     {
@@ -69,7 +62,7 @@ export default function Home() {
   }, []);
   return (
     <>
-      {!isOpen ? (
+      {!!isOpen ? (
         <UpdateBlocker />
       ) : (
         <main>
