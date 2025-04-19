@@ -1,8 +1,7 @@
-"use client"
-import { useSlider } from "@/hooks/useSlider"
+"use client";
+import { useSlider } from "@/hooks/useSlider";
 
 export default function LifeGroupPage() {
-  // TODO : PJOES CONFIRM
   const contents = [
     {
       title: "+ HOW ARE WE MEETING",
@@ -19,43 +18,44 @@ export default function LifeGroupPage() {
       content:
         "Those that want to live life together with like-minded people. We believe that life people make us better, they challenge us and encourage us to become more like Christ. ",
     },
-  ]
-  // TODO: booklist 받기
+  ];
   const bookList = [
     {
-      title:
-        "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
-      author: "by David Mathis",
-      img: "/assets/images/habits-of-grace.png",
+      title: "The Bondage Breaker",
+      author: "by Neil T. Anderson",
+      img: "/assets/images/books/the-bondage-breaker.jpg",
     },
     {
       title:
         "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
       author: "by David Mathis",
-      img: "/assets/images/habits-of-grace.png",
+      img: "/assets/images/books/habits-of-grace.png",
     },
     {
-      title:
-        "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
-      author: "by David Mathis",
-      img: "/assets/images/habits-of-grace.png",
+      title: "The Inner Voice of Love",
+      author: "by Henri Nouwen",
+      img: "/assets/images/books/the-inner-voice.jpg",
     },
     {
-      title:
-        "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
-      author: "by David Mathis",
-      img: "/assets/images/habits-of-grace.png",
+      title: "The Screwtape Letters",
+      author: "by C.S. Lewis",
+      img: "/assets/images/books/screwtape-letters.jpg",
     },
-  ]
+    {
+      title: "The Reason for God",
+      author: "by Timothy Keller",
+      img: "/assets/images/books/reason-of-god.jpg",
+    },
+  ];
 
-  const CARD_WIDTH = 203 + 78
-  const visibleCount = 1
+  const CARD_WIDTH = 203 + 78;
+  const visibleCount = 1;
 
   const { handlePrev, handleNext, translateX, isFirst, isLast } = useSlider(
     bookList,
     visibleCount,
-    CARD_WIDTH,
-  )
+    CARD_WIDTH
+  );
   return (
     <div className="px-4 sm:px-[55px]">
       <section className="flex flex-col lg:flex-row items-center mt-[77px] py-[31px] gap-6">
@@ -89,7 +89,7 @@ export default function LifeGroupPage() {
             className="w-auto max-w-[800px] h-[200px] sm:h-[308px] rounded-[18px]"
           />
         </div>
-        <div className="lg:w-1/2 lg:pr-6 w-[470px] text-center lg:text-left">
+        <div className="lg:w-1/2 lg:pr-6 w-full max-w-[470px] text-center lg:text-left">
           {contents.map((data, index) => {
             return (
               <div className="mt-[29px]" key={index}>
@@ -97,7 +97,7 @@ export default function LifeGroupPage() {
                 <div className="w-full h-[1px] bg-black mt-[15px]" />
                 <div className="mt-[15px]">{data.content}</div>
               </div>
-            )
+            );
           })}
         </div>
       </section>
@@ -112,7 +112,7 @@ export default function LifeGroupPage() {
               disabled={isFirst}
               className="absolute left-2 sm:left-[-40px] top-1/2 -translate-y-1/2 z-30 
              w-10 h-10 flex items-center justify-center 
-             bg-white text-gray-600 text-xl font-bold 
+             bg-white text-gray-600 text-xl font-bold rounded-[50%]
              disabled:opacity-30"
             >
               {"<"}
@@ -122,7 +122,7 @@ export default function LifeGroupPage() {
               disabled={isLast}
               className="absolute right-2 sm:right-[-40px] top-1/2 -translate-y-1/2 z-30 
              w-10 h-10 flex items-center justify-center 
-             bg-white  text-gray-600 text-xl font-bold 
+             bg-white  text-gray-600 text-xl font-bold rounded-[50%]
              disabled:opacity-30"
             >
               {">"}
@@ -158,5 +158,5 @@ export default function LifeGroupPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }
