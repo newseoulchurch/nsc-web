@@ -8,6 +8,7 @@ import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import OurServices from "@/app/visit/our-services";
 
 export default function VisitPage() {
+  const churchAddress = "서초구 남부순환로 2221"
   const churchLocation = {
     lat: 37.4798789,
     lng: 126.9939103,
@@ -52,27 +53,36 @@ export default function VisitPage() {
         <div className="text-left text-2xl font-bold uppercase">Location</div>
 
         <div className="w-full h-[375px] rounded-lg overflow-hidden">
-          <APIProvider apiKey={process.env.GOOGLE_MAPS_API_KEY ?? ""}>
-            <Map
-              style={{ width: "100%", height: "100%" }}
-              defaultCenter={churchLocation}
-              defaultZoom={15}
-              gestureHandling="greedy"
-              disableDefaultUI={true}
-            />
-            <Marker position={churchLocation} />
-          </APIProvider>
+          {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+            <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
+              <Map
+                style={{ width: "100%", height: "100%" }}
+                defaultCenter={churchLocation}
+                defaultZoom={15}
+                gestureHandling="greedy"
+                disableDefaultUI={true}
+              />
+              <Marker position={churchLocation} />
+            </APIProvider>
+          ) : <div>Loading...</div>
+          }
         </div>
 
         <div className="flex flex-col gap-16 pb-16">
           <div className="flex justify-center flex-wrap gap-4">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(churchAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
             <Button
               variant="outline"
               size="sm"
               className="uppercase cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
             >
-              Google Map
+                Google Map 
             </Button>
+            </a>
             <Button
               variant="outline"
               size="sm"
