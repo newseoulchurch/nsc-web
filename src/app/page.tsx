@@ -32,7 +32,7 @@ export default function Home() {
   const [youtubeData, setYoutubeData] = useState<TYoutubeVideo[]>([]);
   const [eventsData, setEventsData] = useState<TEvents[]>();
 
-  const parts = youtubeData[0].title.split(/[\]|\:]/);
+  const parts = youtubeData[0]?.title.split(/[\]|\:]/) ?? [];
 
   async function getYoutubeData() {
     try {
@@ -86,7 +86,7 @@ export default function Home() {
             {/* 🔹 Content Overlay */}
             <div className="relative z-10 text-white">
               <h1 className="text-h1 font-bold">
-                {parts[0].trim()}]
+                {parts[0]?.trim()}]
                 <br />
                 {parts[1]?.trim()}
               </h1>
@@ -245,6 +245,11 @@ export default function Home() {
 
                 {/* ✅ 모바일: 아래에 배치, 데스크탑: 오른쪽 상단 고정 */}
                 <button className="mt-[16px]  flex items-center justify-center lg:absolute lg:top-[-10px] lg:right-[54px]">
+                  <Link
+                    href={"/sermon"}
+                    aria-label="sermon"
+                    className="mt-[23px] flex items-center"
+                  >
                   <span className="mr-[14px]  text-sm leading-[100%] tracking-[0.1rem]">
                     SEE MORE
                   </span>
@@ -253,6 +258,7 @@ export default function Home() {
                     alt="See more events"
                     className="h-4 w-4 mt-[-2px]"
                   />
+                  </Link>
                 </button>
               </div>
 
@@ -265,7 +271,8 @@ export default function Home() {
                     <img
                       src={data.thumbnail}
                       alt="Thumbnail"
-                      className="w-full h-[219px] bg-gray5 rounded-[12px]"
+                      className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
+                      height={'219px'}
                     />
                     <p className="mt-[10px] text-base font-medium">
                       {data.title}
