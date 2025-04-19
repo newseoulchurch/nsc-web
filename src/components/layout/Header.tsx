@@ -1,23 +1,28 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { useIsOpen } from "@/hooks/useIsOpen.ts";
+import UpdateBlocker from "../UpdateBlocker";
 
 export default function Header() {
-  const pathname = usePathname()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const isDarkHeader = ["/sermons"].includes(pathname)
+  const isDarkHeader = ["/sermons"].includes(pathname);
+  const isOpen = useIsOpen();
 
-  const bgClass = isDarkHeader ? "bg-black" : "bg-white"
+  if (!isOpen) return <UpdateBlocker />;
+
+  const bgClass = isDarkHeader ? "bg-black" : "bg-white";
   const logoSrc = isDarkHeader
     ? "assets/images/svg/logo-white.svg"
-    : "assets/images/svg/logo-black.svg"
+    : "assets/images/svg/logo-black.svg";
   const menuSrc = isDarkHeader
     ? "assets/images/menu-white.png"
-    : "assets/images/menu-black.png"
+    : "assets/images/menu-black.png";
 
   const navLinks = [
     { href: "/visit", label: "VISIT US" },
@@ -26,27 +31,27 @@ export default function Header() {
     { href: "/events", label: "EVENTS" },
     { href: "/life-group", label: "LIFE GROUP" },
     { href: "/sermon", label: "SERMON SERIES" },
-  ]
+  ];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false)
+        setIsMenuOpen(false);
       }
     }
 
     if (isMenuOpen) {
-      document.body.style.overflow = "hidden"
-      document.addEventListener("mousedown", handleClickOutside)
+      document.body.style.overflow = "hidden";
+      document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.body.style.overflow = ""
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = ""
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isMenuOpen])
+      document.body.style.overflow = "";
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   return (
     <>
@@ -96,5 +101,5 @@ export default function Header() {
         </>
       )}
     </>
-  )
+  );
 }

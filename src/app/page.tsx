@@ -1,5 +1,7 @@
 "use client";
 
+import UpdateBlocker from "@/components/UpdateBlocker";
+import { useIsOpen } from "@/hooks/useIsOpen.ts";
 import { getEventListeners } from "events";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -45,7 +47,9 @@ export default function Home() {
       url: "https://youtu.be/PD4aYDCQXRI?feature=shared",
     },
   ];
+  const isOpen = useIsOpen();
 
+  if (!isOpen) return <UpdateBlocker />;
   const [youtubeData, setYoutubeData] = useState();
   const [eventsData, setEventsData] = useState();
   async function getYoutubeData() {
