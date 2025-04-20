@@ -12,9 +12,9 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isDarkHeader = ["/sermon"].includes(pathname);
-  const isOpen = useIsOpen();
+  // const isOpen = useIsOpen();
 
-  if (!!isOpen) return <UpdateBlocker />;
+  // if (!!isOpen) return <UpdateBlocker />;
 
   const bgClass = isDarkHeader ? "bg-black" : "bg-white";
   const logoSrc = isDarkHeader
