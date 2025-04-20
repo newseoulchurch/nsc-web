@@ -1,5 +1,6 @@
 "use client";
 import { useSlider } from "@/hooks/useSlider";
+import Link from "next/link";
 
 export default function LifeGroupPage() {
   const contents = [
@@ -70,10 +71,11 @@ export default function LifeGroupPage() {
             We share our stories, along with fellowship, prayer times, reading
             scriptures, books.
           </div>
-          {/* TODO : Join lifegroup 링크 */}
-          <button className="py-[8px] px-[14px] mt-[36px] border border-black border-[1.5px] rounded-[8px] text-button font-medium tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
-            JOIN LIFEGROUP
-          </button>
+          <Link href="https://tinyurl.com/zw3whc2m" passHref>
+            <button className="py-[8px] px-[14px] mt-[36px] border border-black border-[1.5px] rounded-[8px] text-button font-medium tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
+              JOIN LIFEGROUP
+            </button>
+          </Link>
         </div>
         <div className="lg:w-1/2 w-full">
           <img

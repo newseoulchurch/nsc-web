@@ -21,13 +21,15 @@ export default function Home() {
       const res = await fetch("/api/youtube/latest");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error.message);
-      const videos = data.map((item: any) => ({
-        title: item.title,
-        videoId: item.id,
-        videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
-        thumbnail: item.thumbnail,
-        publishedAt: item.publishedAt,
-      }));
+      const videos = data
+        .filter((item: any) => !item.title.toLowerCase().includes("worship"))
+        .map((item: any) => ({
+          title: item.title,
+          videoId: item.id,
+          videoUrl: `https://www.youtube.com/watch?v=${item.id}`,
+          thumbnail: item.thumbnail,
+          publishedAt: item.publishedAt,
+        }));
 
       setYoutubeData(videos.slice(0, 3));
     } catch (error) {
@@ -35,14 +37,12 @@ export default function Home() {
       return [];
     }
   }
-  // TODO
   async function getEvents() {
     const res = await fetch("/api/events");
     const data = await res.json();
     setEventsData(data);
   }
   useEffect(() => {
-    // TODO: server 작업후
     getYoutubeData();
     getEvents();
   }, []);
@@ -68,7 +68,9 @@ export default function Home() {
             {/* 🔹 Content Overlay */}
             <div className="relative z-10 text-white">
               <h1 className="text-h1 font-bold">
-                {parts[0]?.trim().startsWith('[') ? parts[0]?.trim() + ']' : parts[0]?.trim()}
+                {parts[0]?.trim().startsWith("[")
+                  ? parts[0]?.trim() + "]"
+                  : parts[0]?.trim()}
                 <br />
                 {parts[1]?.trim()}
               </h1>
@@ -232,20 +234,20 @@ export default function Home() {
                     aria-label="sermon"
                     className="mt-[23px] flex items-center"
                   >
-                  <span className="mr-[14px]  text-sm leading-[100%] tracking-[0.1rem]">
-                    SEE MORE
-                  </span>
-                  <img
-                    src="/assets/images/svg/plus.svg"
-                    alt="See more events"
-                    className="h-4 w-4 mt-[-2px]"
-                  />
+                    <span className="mr-[14px]  text-sm leading-[100%] tracking-[0.1rem]">
+                      SEE MORE
+                    </span>
+                    <img
+                      src="/assets/images/svg/plus.svg"
+                      alt="See more events"
+                      className="h-4 w-4 mt-[-2px]"
+                    />
                   </Link>
                 </button>
               </div>
 
               <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
-                {(youtubeData.slice(0, 3) || []).map((data, i) => (
+                {(youtubeData || []).map((data, i) => (
                   <article
                     key={i}
                     className="w-full lg:w-[390px] flex-shrink-0"
@@ -259,7 +261,7 @@ export default function Home() {
                         src={data.thumbnail}
                         alt="Thumbnail"
                         className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
-                        height={'219px'}
+                        height={"219px"}
                       />
                       <p className="mt-[10px] text-base font-medium">
                         {data.title}

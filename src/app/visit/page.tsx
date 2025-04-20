@@ -8,7 +8,7 @@ import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import OurServices from "@/app/visit/our-services";
 
 export default function VisitPage() {
-  const churchAddress = "서초구 남부순환로 2221"
+  const churchAddress = "서초구 남부순환로 2221";
   const churchLocation = {
     lat: 37.4798789,
     lng: 126.9939103,
@@ -27,7 +27,7 @@ export default function VisitPage() {
 
         <Button
           onClick={() => {
-            window.open("https://forms.gle/234567890", "_blank");
+            window.open("https://forms.gle/bKFKyNPStafuStbDA", "_blank");
           }}
           className="w-fit uppercase cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
           size="sm"
@@ -64,8 +64,9 @@ export default function VisitPage() {
               />
               <Marker position={churchLocation} />
             </APIProvider>
-          ) : <div>Loading...</div>
-          }
+          ) : (
+            <div>Loading...</div>
+          )}
         </div>
 
         <div className="flex flex-col gap-16 pb-16">
@@ -75,21 +76,22 @@ export default function VisitPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-            <Button
-              variant="outline"
-              size="sm"
-              className="uppercase cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
-            >
-                Google Map 
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="uppercase cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
+              >
+                Google Map
+              </Button>
             </a>
-            <Button
+            {/* TODO: kakao api 연결시 */}
+            {/* <Button
               variant="outline"
               size="sm"
               className="uppercase cursor-pointer hover:bg-black hover:text-white transition-colors duration-200"
             >
               Kakao Map
-            </Button>
+            </Button> */}
           </div>
           <ParkingInfo />
           <PublicTransportInfo />

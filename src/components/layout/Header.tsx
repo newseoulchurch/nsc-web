@@ -11,7 +11,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const isDarkHeader = ["/sermons"].includes(pathname);
+  const isDarkHeader = ["/sermon"].includes(pathname);
   const isOpen = useIsOpen();
 
   if (!!isOpen) return <UpdateBlocker />;
@@ -79,11 +79,14 @@ export default function Header() {
       {/* Menu Overlay */}
       {isMenuOpen && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-30" />
+          <div
+            className="fixed inset-0 bg-black/40 z-[100]"
+            onClick={() => setIsMenuOpen(false)}
+          />
 
           <div
             ref={menuRef}
-            className="fixed top-[58px] left-0 bg-white p-6 z-40  h-full overflow-auto"
+            className="fixed top-0 left-0 w-[280px] bg-white p-6 z-[110] h-full overflow-auto shadow-xl border-r border-gray-200"
           >
             <nav className="space-y-4">
               {navLinks.map((link) => (
@@ -91,7 +94,7 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block text-base font-semibold"
+                  className="block text-base font-semibold text-black"
                 >
                   {link.label}
                 </Link>
