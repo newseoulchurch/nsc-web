@@ -46,8 +46,11 @@ export async function GET(req: NextRequest) {
           title: item.snippet!.title!,
           publishedAt: item.snippet!.publishedAt,
           thumbnail: item.snippet?.thumbnails?.high?.url, // Get high-resolution thumbnail
-        })
-      ) ?? [];
+        }))
+        .filter((video) => { // Filters for Videos with format: [SERIES] title of sermon
+          const titleRegex = /^\[[A-Z\s]+\]\s.+/;
+          return titleRegex.test(video.title);
+        }) ?? [];
 
     return NextResponse.json(latestVideos, { status: 200 });
   } catch (error: any) {
