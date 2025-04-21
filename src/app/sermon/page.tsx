@@ -30,14 +30,14 @@ export default function SermonSeriesPage() {
   const [youtubeData, setYoutubeData] = useState<TYoutubeVideo[]>([]);
   const [youtubeWorship, setYoutubeWorship] = useState<TYoutubeVideo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  console.log("//youtubeWorship", youtubeWorship);
   async function getYoutubeData() {
     try {
       setIsLoading(true);
       const res = await fetch("/api/youtube/latest");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error.message);
-
+      console.log("///data", data);
       const videos = data
         .filter((item: any) => !item.title.toLowerCase().includes("worship"))
         .map((item: any) => ({
@@ -134,7 +134,8 @@ export default function SermonSeriesPage() {
           </div>
         )}
       </section>
-      <section className="px-14 py-14">
+      {/* TODO: 워십만 따로 할때 */}
+      {/* <section className="px-14 py-14">
         <div className="flex justify-center items-center">
           <h3 className="text-h3 font-bold">LATEST WORSHIP</h3>
         </div>
@@ -165,13 +166,13 @@ export default function SermonSeriesPage() {
             ))}
           </div>
         )}
-      </section>
+      </section> */}
       <section className="flex flex-col items-center justify-center my-10 px-4 sm:px-14">
         <h1 className="text-xl sm:text-2xl font-bold uppercase text-center">
           Previous Sermons
         </h1>
 
-        <div className="w-full bg-[#FF03031C] h-6 sm:h-10 my-4" />
+        <div className="w-full h-6 sm:h-10 my-4" />
 
         <div className="flex flex-col gap-8 w-full">
           {previousSermons.map((sermon) => (
@@ -203,7 +204,7 @@ export default function SermonSeriesPage() {
           ))}
         </div>
 
-        <div className="w-full bg-[#FF03031C] h-6 sm:h-10 my-4" />
+        <div className="w-full h-6 sm:h-10 my-4" />
 
         <Button
           className="mt-4 bg-black uppercase text-white border-white hover:bg-white hover:text-black"

@@ -7,10 +7,13 @@ export default function EventsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [eventsData, setEventsData] = useState<TEvents[]>([]);
 
-  const upcomingEvents = eventsData.filter(
-    (event) => event.status === "upcoming"
-  );
-  const pastEvents = eventsData.filter((event) => event.status === "past");
+  const upcomingEvents = eventsData.filter((event) => {
+    return event.status === "upcoming";
+  });
+
+  const pastEvents = eventsData.filter((event) => {
+    return event.status === "past";
+  });
 
   const maxIndex = Math.max((eventsData || []).length - 3, 0);
 
@@ -25,7 +28,7 @@ export default function EventsPage() {
   const renderEventCard = (data: TEvents, i: number) => (
     <article
       key={i}
-      className="mt-8 sm:mt-[33px]min-w-[280px] sm:w-[327px] flex-shrink-0"
+      className="mt-8 sm:mt-[33px] min-w-[280px] sm:w-[327px] flex-shrink-0 "
     >
       <div
         className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
@@ -50,7 +53,18 @@ export default function EventsPage() {
   async function getEvents() {
     const res = await fetch("/api/events");
     const data = await res.json();
-    setEventsData(data);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const enriched = data.map((event: TEvents) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+
+      const status = eventDate < today ? "past" : "upcoming";
+      return { ...event, status };
+    });
+
+    setEventsData(enriched);
   }
   useEffect(() => {
     getEvents();
@@ -73,7 +87,7 @@ export default function EventsPage() {
           />
         </div>
       </section>
-      <div className="mt-8 sm:mt-[33px] flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
+      <div className="flex flex-wrap gap-4 mt-6  justify-center sm:justify-start">
         {(upcomingEvents || []).map((data, i) => (
           <article key={i} className="min-w-[280px] sm:w-[327px] flex-shrink-0">
             <div
@@ -99,8 +113,10 @@ export default function EventsPage() {
       </div>
 
       <section className="mt-[65px] mb-[27px]">
-        <div className="text-2xl sm:text-h3 font-bold">PAST</div>
-        <div className="flex flex-wrap gap-4 mt-6 justify-start sm:justify-normal">
+        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left">
+          PAST
+        </div>
+        <div className="flex  gap-4 mt-6 overflow-x-auto scroll-smooth thin-scrollbar space-x-  ">
           {(pastEvents || [])
             .filter((e) => e.status === "past")
             .map(renderEventCard)}
