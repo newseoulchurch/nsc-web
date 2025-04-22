@@ -1,9 +1,9 @@
-import { google, youtube_v3 } from 'googleapis';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { NextResponse, NextRequest } from 'next/server';
+import { google, youtube_v3 } from "googleapis";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse, NextRequest } from "next/server";
 
 const youtube = google.youtube({
-  version: 'v3',
+  version: "v3",
   auth: process.env.YOUTUBE_API_KEY,
 });
 
@@ -19,44 +19,46 @@ const MAX_LATEST_VIDEO_RESULTS = 10;
 export async function GET(req: NextRequest) {
   try {
     const channelResponse = await youtube.channels.list({
-      part: ['contentDetails'],
-      id: [process.env.YOUTUBE_CHANNEL_ID!], 
+      part: ["contentDetails"],
+      id: [process.env.YOUTUBE_CHANNEL_ID!],
     });
 
     const uploadsPlaylistId =
-      channelResponse.data.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+      channelResponse.data.items?.[0]?.contentDetails?.relatedPlaylists
+        ?.uploads;
 
     if (!uploadsPlaylistId) {
       return NextResponse.json(
-        { error: 'Could not find uploads playlist ID' },
+        { error: "Could not find uploads playlist ID" },
         { status: 404 }
       );
     }
 
-    const playlistItemsResponse = await youtube.playlistItems.list({ // Upload playlist
-      part: ['snippet'],
+    const playlistItemsResponse = await youtube.playlistItems.list({
+      // Upload playlist
+      part: ["snippet"],
       playlistId: uploadsPlaylistId,
       maxResults: MAX_LATEST_VIDEO_RESULTS,
     });
 
     const latestVideos: LatestVideoResult[] =
-      playlistItemsResponse.data.items?.map(
-        (item: youtube_v3.Schema$PlaylistItem) => ({
+      playlistItemsResponse.data.items
+        ?.map((item: youtube_v3.Schema$PlaylistItem) => ({
           id: item.snippet!.resourceId!.videoId!,
           title: item.snippet!.title!,
           publishedAt: item.snippet!.publishedAt,
           thumbnail: item.snippet?.thumbnails?.high?.url, // Get high-resolution thumbnail
         }))
-        .filter((video) => { // Filters for Videos with format: [SERIES] title of sermon
-          const titleRegex = /^\[[A-Z\s]+\]\s.+/;
+        .filter((video) => {
+          // Filters for Videos with format: [SERIES] title of sermon
+          const titleRegex = /Pastor/i;
           return titleRegex.test(video.title);
         }) ?? [];
-
     return NextResponse.json(latestVideos, { status: 200 });
   } catch (error: any) {
-    console.error('Error fetching latest videos:', error);
+    console.error("Error fetching latest videos:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch latest videos' },
+      { error: "Failed to fetch latest videos" },
       { status: 500 }
     );
   }

@@ -31,7 +31,7 @@ export default function Home() {
           publishedAt: item.publishedAt,
         }));
 
-      setYoutubeData(videos.slice(0, 3));
+      setYoutubeData(videos.slice(0, 5));
     } catch (error) {
       console.error("Failed to fetch YouTube data:", error);
       return [];
@@ -40,7 +40,32 @@ export default function Home() {
   async function getEvents() {
     const res = await fetch("/api/events");
     const data = await res.json();
-    setEventsData(data);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const enriched = data.map((event: TEvents) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+
+      const status = eventDate < today ? "past" : "upcoming";
+      return { ...event, eventDate, status };
+    });
+
+    const sorted = enriched.sort((a, b) => {
+      if (a.status === "upcoming" && b.status === "past") return -1;
+      if (a.status === "past" && b.status === "upcoming") return 1;
+
+      if (a.status === "upcoming" && b.status === "upcoming") {
+        return a.eventDate.getTime() - b.eventDate.getTime();
+      }
+      if (a.status === "past" && b.status === "past") {
+        return b.eventDate.getTime() - a.eventDate.getTime();
+      }
+
+      return 0;
+    });
+
+    setEventsData(sorted);
   }
   useEffect(() => {
     getYoutubeData();
