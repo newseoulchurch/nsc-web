@@ -4,11 +4,13 @@ import z from 'zod';
 import { getEdgeConfigCredentials } from '@/lib/edge-config';
  
 const EventSchema = z.object({
-  id: z.string(),
+  status: z.string(),
   title: z.string(),
   date: z.string(), 
-  location: z.string(),
-  description: z.string().optional(),
+  time: z.string(),
+  img_url: z.string(),
+  // location: z.string(),
+  // description: z.string().optional(),
 });
 
 export async function GET() {
