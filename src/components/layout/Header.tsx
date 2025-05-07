@@ -12,17 +12,17 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isDarkHeader = ["/sermon"].includes(pathname);
+  const isAdmin = pathname.includes("admin");
   // const isOpen = useIsOpen();
-
   // if (!!isOpen) return <UpdateBlocker />;
 
   const bgClass = isDarkHeader ? "bg-black" : "bg-white";
   const logoSrc = isDarkHeader
-    ? "assets/images/svg/logo-white.svg"
-    : "assets/images/svg/logo-black.svg";
+    ? "/assets/images/svg/logo-white.svg"
+    : "/assets/images/svg/logo-black.svg";
   const menuSrc = isDarkHeader
-    ? "assets/images/menu-white.png"
-    : "assets/images/menu-black.png";
+    ? "/assets/images/menu-white.png"
+    : "/assets/images/menu-black.png";
 
   const navLinks = [
     { href: "/visit", label: "VISIT US" },
@@ -31,6 +31,10 @@ export default function Header() {
     { href: "/events", label: "EVENTS" },
     { href: "/life-group", label: "LIFE GROUP" },
     { href: "/sermon", label: "SERMON SERIES" },
+  ];
+  const adminNavLinks = [
+    { href: "/admin/events", label: "이벤트 관리" },
+    { href: "/admin/bulletins", label: "주보 관리" },
   ];
 
   useEffect(() => {
@@ -89,7 +93,7 @@ export default function Header() {
             className="fixed top-0 left-0 w-[280px] bg-white p-6 z-[110] h-full overflow-auto shadow-xl border-r border-gray-200"
           >
             <nav className="space-y-4">
-              {navLinks.map((link) => (
+              {(isAdmin ? adminNavLinks : navLinks).map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
