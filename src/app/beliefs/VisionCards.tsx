@@ -24,6 +24,11 @@ const cards = [
     verse: "Philippians 2:15",
   },
   {
+    title: "RENEWING THE SPIRIT OF THE GOSPEL",
+    body: "Revival begins with a Deeper Love for the Gospel",
+    verse: "Ephesians 2:4~5",
+  },
+  {
     title: "PEACEMAKING FOR THE UNIVERSAL CHURCH",
     body: "Not a church of singular language, but a church for all nations.",
     verse: "1 Corinthians 1:10",
