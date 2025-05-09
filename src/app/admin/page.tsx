@@ -16,7 +16,7 @@ export default async function AdminPage() {
         <a href="/admin/events" className="underline text-blue-500">
           이벤트 관리
         </a>
-        <a href="/admin/bulletins" className="underline text-blue-500">
+        <a href="/admin/weekly-paper" className="underline text-blue-500">
           주보 관리
         </a>
       </div>

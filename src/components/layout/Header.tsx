@@ -34,7 +34,7 @@ export default function Header() {
   ];
   const adminNavLinks = [
     { href: "/admin/events", label: "이벤트 관리" },
-    { href: "/admin/bulletins", label: "주보 관리" },
+    { href: "/admin/weekly-paper", label: "주보 관리" },
   ];
 
   useEffect(() => {
