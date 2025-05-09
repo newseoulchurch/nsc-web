@@ -117,39 +117,60 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-[68px] mb-[61px] px-4  lg:px-[54px]">
+        <section className="mt-[68px] mb-[61px] px-4 lg:px-[54px]">
           {/* Sunday Service */}
           <div
-            className="h-[300px] sm:h-[376px]  rounded-[14px] flex flex-col items-center justify-center text-center bg-cover bg-center"
+            className="rounded-[14px] flex flex-col items-center justify-center text-center bg-cover bg-center px-4 py-10 sm:py-12"
             style={{
               backgroundImage: "url('/assets/images/main-back-image1.jpeg')",
+              backgroundPosition: "center",
+              backgroundSize: "cover",
+              minHeight: "300px",
             }}
           >
-            <h2 className="text-2xl sm:text-h2 font-bold text-white">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
               JOIN US SUNDAY
             </h2>
-            <div className="max-w-[486px] h-[auto] sm:h-[64px] mt-[30px] sm:mt-[51px] sm:mx-[10px] bg-white rounded-[12px] flex flex-col sm:flex-row items-center justify-center px-[57px] py-2 sm:py-0">
-              <div className="flex items-center mb-2 sm:mb-0">
+
+            {/* Time & Location */}
+            <div className="w-full max-w-[486px] mt-6 sm:mt-10 bg-white rounded-[12px] flex flex-col sm:flex-row items-center justify-center px-6 py-4 gap-4">
+              <div className="flex items-center">
                 <img
                   src="/assets/images/svg/time.svg"
                   alt="Service Time"
-                  className="w-4 h-4 sm:w-auto sm:h-auto"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <span className="ml-4 text-sm leading-none text-black">
-                  11:00am
-                </span>
+                <span className="ml-3 text-sm text-black">11:00am</span>
               </div>
               <div className="flex items-center sm:ml-6">
                 <img
                   src="/assets/images/svg/map.svg"
                   alt="Map Icon"
-                  className="w-4 h-4 sm:w-auto sm:h-auto"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                 />
-                <address className="ml-4 text-sm leading-[120%] not-italic text-start text-black">
+                <address className="ml-3 text-sm text-black not-italic leading-snug text-left">
                   2221 Nambusunhwan-ro,
                   <br />
                   Seocho-gu, Seoul
                 </address>
+              </div>
+            </div>
+
+            {/* Weekly Paper */}
+            <div className="w-full max-w-[486px] mt-6 sm:mt-8 bg-white rounded-[12px] px-6 py-5 shadow-md">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between text-center lg:text-left">
+                <div>
+                  <h4 className="text-xl font-bold text-black">WEEKLY PAPER</h4>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Check out the latest church Weekly paper
+                  </p>
+                </div>
+                <a
+                  href="/weekly-paper"
+                  className="mt-4 lg:mt-0 text-sm font-medium text-white bg-black hover:bg-gray-600 rounded-full px-5 py-2 transition self-center lg:self-auto"
+                >
+                  View Weekly paper
+                </a>
               </div>
             </div>
           </div>
