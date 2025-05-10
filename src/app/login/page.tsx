@@ -1,18 +1,30 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
-import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 
 export default function loginPage() {
-  const [id, setId] = useState("")
-  const [password, setPassword] = useState("")
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
-    document.cookie = `adminToken=mock-admin-token; path=/; max-age=3600`
-  }, [])
+    document.cookie = `adminToken=mock-admin-token; path=/; max-age=3600`;
+    // generateSecurePassword();
+  }, []);
+
+  // function generateSecurePassword(length = 12) {
+  //   const charset =
+  //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}";
+  //   console.log(
+  //     Array.from(
+  //       { length },
+  //       () => charset[Math.floor(Math.random() * charset.length)]
+  //     ).join("")
+  //   );
+  // }
 
   const handleLogin = async () => {
     try {
@@ -21,15 +33,15 @@ export default function loginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, password }),
         credentials: "include",
-      })
+      });
 
       if (res.ok) {
-        window.location.href = "/admin"
+        window.location.href = "/admin";
       }
     } catch (err) {
-      console.error("❌ 로그인 에러:", err)
+      console.error("❌ 로그인 에러:", err);
     }
-  }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
@@ -59,5 +71,5 @@ export default function loginPage() {
         </CardContent>
       </Card>
     </main>
-  )
+  );
 }
