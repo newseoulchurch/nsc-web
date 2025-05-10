@@ -2,7 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q");
   if (!q) {
@@ -28,7 +28,10 @@ export async function GET(req: Request) {
   const embedding = (await embeddingRes.json()).data[0].embedding;
 
   // 2. Query Supabase for top 3 matches by vector similarity
-  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   const { data, error } = await supabase.rpc("match_sermons", {
     embedding: embedding,
     match_count: 3,

@@ -15,6 +15,30 @@ export default function Home() {
   const [eventsData, setEventsData] = useState<TEvents[]>();
 
   const parts = youtubeData[0]?.title.split(/[\]|\:]/) ?? [];
+  const [query, setQuery] = useState("");
+  const [searchData, setSearchData] = useState<TYoutubeVideo[]>([]);
+
+  const handleSearch = async (e: KeyboardEvent | null, keyword?: string) => {
+    const searchTerm = keyword ?? query;
+
+    if ((e === null || e.key === "Enter") && searchTerm.trim()) {
+      try {
+        const res = await fetch(`/api/sermon/search?q=${searchTerm}`, {
+          method: "POST",
+        });
+
+        const data = await res.json();
+        setSearchData(
+          data.results.map((item: any) => ({
+            ...item,
+            videoUrl: `https://www.youtube.com/watch?v=${item.videoId}`,
+          }))
+        );
+      } catch (error) {
+        console.error("Search error:", error);
+      }
+    }
+  };
 
   async function getYoutubeData() {
     try {
@@ -206,42 +230,128 @@ export default function Home() {
             </div>
           </section>
           <section>
-            {/* TODO : after open */}
-            {/* <div className="mt-[85px] relative">
-            <div className=" flex justify-center items-center ">
-              <h3 className="text-h3 font-bold">SEARCH PASTOR’s MESSAGE</h3>
-            </div> 
-          </div> 
-          <div className="mt-[25px] flex justify-center items-center">
-            <div className="w-[616px] h-[53px] pl-[18px] flex justify-start  items-center bg-gray5 rounded-[17px]">
-              <img src="/assets/images/svg/zoom-icon.svg" />
-              <input
-                type="text"
-                placeholder="Type anything you need"
-                className="ml-[29px] w-full bg-transparent border-none outline-none "
-              />
+            <div className="mt-[85px] relative">
+              <div className="flex justify-center items-center">
+                <h3 className="text-h3 font-bold">SEARCH PASTOR’s MESSAGE</h3>
+              </div>
             </div>
-          </div> */}
 
-            {/* TODO: 추천,태그 검색 후 불러오기 */}
-            {/* <div className="mt-[26px] justify-center items-center flex overflow-x-auto scroll-smooth thin-scrollbar">
-          </div>
-          <div className="flex justify-center">
-            {[
-              "Encourage",
-              "Discpleship",
-              "Fellowship",
-              "Happiness",
-              "Blessings",
-            ].map((data) => {
-              return (
-                <button className="py-[8px] px-[14px] mr-[16px] text-gray-600 border border-gray-100 rounded-[8px] cursor-pointer hover:bg-gray-100 transition">
-                  {data}
-                </button>
-              );
-            })}
-          </div> */}
+            <div className="mt-[25px] flex justify-center items-center">
+              <div className="w-[616px] h-[53px] pl-[18px] flex justify-start items-center bg-gray5 rounded-[17px]">
+                <img src="/assets/images/svg/zoom-icon.svg" />
+                <input
+                  type="text"
+                  placeholder="Type anything you need"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => handleSearch(e)}
+                  className="ml-[29px] w-full bg-transparent border-none outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="mt-[26px] flex  w-max mx-auto">
+              {["Discpleship", "Fellowship", "Happiness", "Blessings"].map(
+                (keyword) => (
+                  <button
+                    key={keyword}
+                    onClick={() => {
+                      setQuery(keyword);
+                      handleSearch(null, keyword);
+                    }}
+                    className="py-[8px] px-[14px] mr-[16px] text-gray-600 border border-gray-100 rounded-[8px] cursor-pointer hover:bg-gray-100 transition"
+                  >
+                    {keyword}
+                  </button>
+                )
+              )}
+            </div>
+
+            <div className="mt-[26px] overflow-x-auto scroll-smooth thin-scrollbar px-4">
+              <div className="flex gap-[16px] w-max mx-auto">
+                {searchData.map((data, i) => (
+                  <article
+                    key={i}
+                    className="min-w-[240px] max-w-[240px] flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-100 cursor-pointer"
+                  >
+                    <a
+                      href={data.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-3"
+                    >
+                      <img
+                        src={data.thumbnail}
+                        alt="Thumbnail"
+                        className="w-full h-[135px] rounded-md object-cover"
+                      />
+                      <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
+                        {data.title}
+                      </p>
+                    </a>
+                  </article>
+                ))}
+              </div>
+            </div>
           </section>
+          {/* TODO : 디자이너님 컨펌 */}
+          {/* <section>
+            <div className="mt-[85px] relative">
+              <div className=" flex justify-center items-center ">
+                <h3 className="text-h3 font-bold">SEARCH PASTOR’s MESSAGE</h3>
+              </div>
+            </div>
+            <div className="mt-[25px] flex justify-center items-center">
+              <div className="w-[616px] h-[53px] pl-[18px] flex justify-start items-center bg-gray5 rounded-[17px]">
+                <img src="/assets/images/svg/zoom-icon.svg" />
+                <input
+                  type="text"
+                  placeholder="Type anything you need"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleSearch}
+                  className="ml-[29px] w-full bg-transparent border-none outline-none"
+                />
+              </div>
+            </div>
+            <div className="mt-[26px] justify-center items-center flex overflow-x-auto scroll-smooth thin-scrollbar"></div>
+            <div className="flex justify-center">
+              {[
+                "Encourage",
+                "Discpleship",
+                "Fellowship",
+                "Happiness",
+                "Blessings",
+              ].map((data) => {
+                return (
+                  <button className="py-[8px] px-[14px] mr-[16px] text-gray-600 border border-gray-100 rounded-[8px] cursor-pointer hover:bg-gray-100 transition">
+                    {data}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
+              {(searchData || []).map((data, i) => (
+                <article key={i} className="w-full lg:w-[390px] flex-shrink-0">
+                  <a
+                    href={data.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={data.thumbnail}
+                      alt="Thumbnail"
+                      className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
+                      height={"219px"}
+                    />
+                    <p className="mt-[10px] text-base font-medium">
+                      {data.title}
+                    </p>
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section> */}
           <section>
             <div className="mt-[64px] relative flex flex-col">
               <div className="flex justify-center items-center">
