@@ -6,6 +6,7 @@ import { TEvents } from "@/types/events";
 import { TYoutubeVideo } from "@/types/youtube";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 // import "./globals.css";
 
 export default function Home() {
@@ -226,21 +227,23 @@ export default function Home() {
                   key={i}
                   className="min-w-[280px] sm:w-[327px] flex-shrink-0"
                 >
-                  <div
-                    className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${data.img_url || "/assets/images/default-event.jpg"})`,
-                    }}
-                  >
-                    <span className="inline-block p-[4px] rounded-[6px] text-[13px] bg-white">
+                  <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
+                    <Image
+                      src={data.img_url || "/assets/images/default-event.jpg"}
+                      alt={data.title}
+                      fill // makes the image fill the parent div
+                      style={{ objectFit: "cover", objectPosition: "center" }}
+                      sizes="(max-width: 640px) 280px, 327px"
+                      priority={i < 2} // optionally prioritize the first few images
+                    />
+                    <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
                       {data.status}
                     </span>
-                    <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-                    <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
+                    <div className="absolute top-[38px] left-[10px] w-[56px] h-[1px] mt-[28px] bg-white z-10" />
+                    <h4 className="absolute top-[67px] left-[10px] mt-[14px] text-lg sm:text-h3 text-white z-10">
                       {data.title}
                     </h4>
                   </div>
-
                   <p className="mt-[10px] text-base font-medium">
                     {data.title}
                   </p>
@@ -406,12 +409,16 @@ export default function Home() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <img
-                      src={data.thumbnail}
-                      alt="Thumbnail"
-                      className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
-                      height={"219px"}
-                    />
+                    <div className="w-full h-[219px] bg-gray5 rounded-[12px] overflow-hidden relative">
+                      <Image
+                        src={data.thumbnail}
+                        alt="Thumbnail"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 327px" // Adjust as needed for your layout
+                        style={{ borderRadius: "12px" }}
+                      />
+                    </div>
                     <p className="mt-[10px] text-base font-medium">
                       {data.title}
                     </p>
