@@ -1,6 +1,8 @@
 "use client";
 import { TEvents } from "@/types/events";
 import { useEffect, useState } from "react";
+import { EventCardList } from "@/components/EventCardList";
+import Image from "next/image";
 
 export default function EventsPage() {
   const CARD_WIDTH = 390 + 120;
@@ -26,10 +28,7 @@ export default function EventsPage() {
   };
 
   const renderEventCard = (data: TEvents, i: number) => (
-    <article
-      key={i}
-      className="mt-8 sm:mt-[33px] min-w-[280px] sm:w-[327px] flex-shrink-0 "
-    >
+    <article key={i} className="mt-8 sm:mt-[33px] min-w-[280px] sm:w-[327px] flex-shrink-0 ">
       <div
         className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
         style={{
@@ -40,9 +39,7 @@ export default function EventsPage() {
           {data.status}
         </span>
         <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-        <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
-          {data.title}
-        </h4>
+        <h4 className="mt-[14px] text-lg sm:text-h3 text-white">{data.title}</h4>
       </div>
 
       <p className="mt-[10px] text-base font-medium">{data.title}</p>
@@ -81,46 +78,23 @@ export default function EventsPage() {
           </div>
         </div>
         <div className="lg:w-1/2 w-full">
-          <img
-            src="/assets/images/event-main-photo1.jpeg"
-            className="w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px]"
-          />
+          <div className="relative w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px] overflow-hidden">
+            <Image
+              src="/assets/images/event-main-photo1.jpeg"
+              alt="Event Main Photo"
+              fill
+              sizes="(max-width: 640px) 100vw, 100vw"
+              style={{ objectFit: "cover" }}
+              className="rounded-[18px]"
+            />
+          </div>
         </div>
       </section>
-      <div className="flex flex-wrap gap-4 mt-6  justify-center sm:justify-start">
-        {(upcomingEvents || []).map((data, i) => (
-          <article key={i} className="min-w-[280px] sm:w-[327px] flex-shrink-0">
-            <div
-              className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${data.img_url || "/assets/images/default-event.jpg"})`,
-              }}
-            >
-              <span className="inline-block p-[4px] rounded-[6px] text-[13px] bg-white">
-                {data.status}
-              </span>
-              <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-              <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
-                {data.title}
-              </h4>
-            </div>
-
-            <p className="mt-[10px] text-base font-medium">{data.title}</p>
-            <p className="mt-[10px] text-base font-medium">{data.date}</p>
-            <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
-          </article>
-        ))}
-      </div>
+      <EventCardList eventsData={upcomingEvents} />
 
       <section className="mt-[65px] mb-[27px]">
-        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left">
-          PAST
-        </div>
-        <div className="flex  gap-4 mt-6 overflow-x-auto scroll-smooth thin-scrollbar space-x-  ">
-          {(pastEvents || [])
-            .filter((e) => e.status === "past")
-            .map(renderEventCard)}
-        </div>
+        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left mb-6">PAST</div>
+        <EventCardList eventsData={pastEvents} />
 
         {/* TODO: after events setting more */}
         {/* <div className="flex justify-center mt-8 mb-[27px]">

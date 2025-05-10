@@ -6,6 +6,7 @@ import { TEvents } from "@/types/events";
 import { TYoutubeVideo } from "@/types/youtube";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 // import "./globals.css";
 
 export default function Home() {
@@ -117,9 +118,7 @@ export default function Home() {
           {/* 🔹 Content Overlay */}
           <div className="relative z-10 text-white">
             <h1 className="text-h1 font-bold">
-              {parts[0]?.trim().startsWith("[")
-                ? parts[0]?.trim() + "]"
-                : parts[0]?.trim()}
+              {parts[0]?.trim().startsWith("[") ? parts[0]?.trim() + "]" : parts[0]?.trim()}
               <br />
               {parts[1]?.trim()}
             </h1>
@@ -149,9 +148,7 @@ export default function Home() {
               backgroundImage: "url('/assets/images/main-back-image1.jpeg')",
             }}
           >
-            <h2 className="text-2xl sm:text-h2 font-bold text-white">
-              JOIN US SUNDAY
-            </h2>
+            <h2 className="text-2xl sm:text-h2 font-bold text-white">JOIN US SUNDAY</h2>
             <div className="max-w-[486px] h-[auto] sm:h-[64px] mt-[30px] sm:mt-[51px] sm:mx-[10px] bg-white rounded-[12px] flex flex-col sm:flex-row items-center justify-center px-[57px] py-2 sm:py-0">
               <div className="flex items-center mb-2 sm:mb-0">
                 <img
@@ -159,9 +156,7 @@ export default function Home() {
                   alt="Service Time"
                   className="w-4 h-4 sm:w-auto sm:h-auto"
                 />
-                <span className="ml-4 text-sm leading-none text-black">
-                  11:00am
-                </span>
+                <span className="ml-4 text-sm leading-none text-black">11:00am</span>
               </div>
               <div className="flex items-center sm:ml-6">
                 <img
@@ -182,47 +177,34 @@ export default function Home() {
           <section className="mt-[61px] pt-[24px] flex justify-between flex-col lg:flex-row">
             <div className="w-full lg:w-[200px] mb-6 lg:mr-[138px]">
               <h3 className="text-h3 font-bold">EVENTS</h3>
-              <Link
-                href={"/events"}
-                aria-label="events"
-                className="mt-[23px] flex items-center"
-              >
-                <span className="mr-[14px] text-sm tracking-[0.1rem]">
-                  LEARN MORE
-                </span>
-                <img
-                  src="/assets/images/svg/plus.svg"
-                  alt="See more events"
-                  className="h-4 w-4"
-                />
+              <Link href={"/events"} aria-label="events" className="mt-[23px] flex items-center">
+                <span className="mr-[14px] text-sm tracking-[0.1rem]">LEARN MORE</span>
+                <img src="/assets/images/svg/plus.svg" alt="See more events" className="h-4 w-4" />
               </Link>
             </div>
 
             {/* Slide */}
             <div className=" flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
               {(eventsData || []).map((data, i) => (
-                <article
-                  key={i}
-                  className="min-w-[280px] sm:w-[327px] flex-shrink-0"
-                >
-                  <div
-                    className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${data.img_url || "/assets/images/default-event.jpg"})`,
-                    }}
-                  >
-                    <span className="inline-block p-[4px] rounded-[6px] text-[13px] bg-white">
+                <article key={i} className="min-w-[280px] sm:w-[327px] flex-shrink-0">
+                  <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
+                    <Image
+                      src={data.img_url || "/assets/images/default-event.jpg"}
+                      alt={data.title}
+                      fill // makes the image fill the parent div
+                      style={{ objectFit: "cover", objectPosition: "center" }}
+                      sizes="(max-width: 640px) 280px, 327px"
+                      priority={i < 2} // optionally prioritize the first few images
+                    />
+                    <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
                       {data.status}
                     </span>
-                    <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-                    <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
+                    <div className="absolute top-[38px] left-[10px] w-[56px] h-[1px] mt-[28px] bg-white z-10" />
+                    <h4 className="absolute top-[67px] left-[10px] mt-[14px] text-lg sm:text-h3 text-white z-10">
                       {data.title}
                     </h4>
                   </div>
-
-                  <p className="mt-[10px] text-base font-medium">
-                    {data.title}
-                  </p>
+                  <p className="mt-[10px] text-base font-medium">{data.title}</p>
                   <p className="mt-[10px] text-base font-medium">{data.date}</p>
                   <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
                 </article>
@@ -360,11 +342,7 @@ export default function Home() {
 
               {/* ✅ 모바일: 아래에 배치, 데스크탑: 오른쪽 상단 고정 */}
               <button className="mt-[16px]  flex items-center justify-center lg:absolute lg:top-[-10px] lg:right-[54px]">
-                <Link
-                  href={"/sermon"}
-                  aria-label="sermon"
-                  className="mt-[23px] flex items-center"
-                >
+                <Link href={"/sermon"} aria-label="sermon" className="mt-[23px] flex items-center">
                   <span className="mr-[14px]  text-sm leading-[100%] tracking-[0.1rem]">
                     SEE MORE
                   </span>
@@ -380,20 +358,18 @@ export default function Home() {
             <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
               {(youtubeData || []).map((data, i) => (
                 <article key={i} className="w-full lg:w-[390px] flex-shrink-0">
-                  <a
-                    href={data.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={data.thumbnail}
-                      alt="Thumbnail"
-                      className="w-full h-[219px] bg-gray5 rounded-[12px] object-cover"
-                      height={"219px"}
-                    />
-                    <p className="mt-[10px] text-base font-medium">
-                      {data.title}
-                    </p>
+                  <a href={data.videoUrl} target="_blank" rel="noopener noreferrer">
+                    <div className="w-full h-[219px] bg-gray5 rounded-[12px] overflow-hidden relative">
+                      <Image
+                        src={data.thumbnail}
+                        alt="Thumbnail"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 327px" // Adjust as needed for your layout
+                        style={{ borderRadius: "12px" }}
+                      />
+                    </div>
+                    <p className="mt-[10px] text-base font-medium">{data.title}</p>
                   </a>
                 </article>
               ))}
@@ -406,12 +382,8 @@ export default function Home() {
                 backgroundImage: "url('/assets/images/main-back-image2.png')",
               }}
             >
-              <div className="text-div font-bold text-white">
-                GET TO KNOW US
-              </div>
-              <h3 className="mt-[38px] text-h3 font-bold text-white">
-                WHAT IS RADICAL OBEDIENCE?
-              </h3>
+              <div className="text-div font-bold text-white">GET TO KNOW US</div>
+              <h3 className="mt-[38px] text-h3 font-bold text-white">WHAT IS RADICAL OBEDIENCE?</h3>
               <div className="flex mt-[39px] ">
                 <Link
                   href={"/about"}
