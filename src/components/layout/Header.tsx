@@ -3,18 +3,18 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
 import { useIsOpen } from "@/hooks/useIsOpen.ts";
 import UpdateBlocker from "../UpdateBlocker";
 
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isDarkHeader = ["/sermon"].includes(pathname);
   const isAdmin = pathname.includes("admin");
-  // const isOpen = useIsOpen();
-  // if (!!isOpen) return <UpdateBlocker />;
 
   const bgClass = isDarkHeader ? "bg-black" : "bg-white";
   const logoSrc = isDarkHeader
@@ -34,8 +34,13 @@ export default function Header() {
   ];
   const adminNavLinks = [
     { href: "/admin/events", label: "이벤트 관리" },
-    { href: "/admin/bulletins", label: "주보 관리" },
+    { href: "/admin/weekly-paper", label: "주보 관리" },
   ];
+
+  useEffect(() => {
+    const token = Cookies.get("adminToken");
+    setIsLoggedIn(!!token);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -57,9 +62,15 @@ export default function Header() {
     };
   }, [isMenuOpen]);
 
+  const handleLogout = () => {
+    Cookies.remove("adminToken");
+    setIsLoggedIn(false);
+    setIsMenuOpen(false);
+    window.location.href = "/";
+  };
+
   return (
     <>
-      {/* Header */}
       <header className={`h-[58px] ${bgClass} relative z-50`}>
         <div className="flex items-center h-full px-4">
           <div className="w-1/3">
@@ -80,7 +91,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Menu Overlay */}
       {isMenuOpen && (
         <>
           <div
@@ -103,6 +113,15 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
+
+              {isLoggedIn && (
+                <button
+                  onClick={handleLogout}
+                  className="block text-base font-semibold text-red-600"
+                >
+                  로그아웃
+                </button>
+              )}
             </nav>
           </div>
         </>

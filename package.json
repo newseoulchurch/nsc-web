@@ -12,6 +12,7 @@
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@supabase/supabase-js": "^2.49.4",
+    "@vercel/blob": "^1.0.1",
     "@vercel/edge-config": "^1.4.0",
     "@vis.gl/react-google-maps": "^1.5.2",
     "class-variance-authority": "^0.7.1",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
