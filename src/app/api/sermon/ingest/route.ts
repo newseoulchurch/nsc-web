@@ -30,8 +30,7 @@ async function fetchLatestVideos() {
     res.data.items
       ?.filter(
         (item) =>
-          item.snippet?.title?.includes("Sunday Service Worship") ||
-          item.snippet?.description?.includes("Songs")
+          item.snippet?.description?.includes("Sermon")
       )
       .map((item) => ({
         videoId: item.id?.videoId,

@@ -1,6 +1,7 @@
 "use client";
 import { useSlider } from "@/hooks/useSlider";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LifeGroupPage() {
   const contents = [
@@ -27,8 +28,7 @@ export default function LifeGroupPage() {
       img: "/assets/images/books/the-bondage-breaker.jpg",
     },
     {
-      title:
-        "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
+      title: "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
       author: "by David Mathis",
       img: "/assets/images/books/habits-of-grace.png",
     },
@@ -63,13 +63,11 @@ export default function LifeGroupPage() {
         <div className="lg:w-1/2 lg:pr-6 w-full text-center lg:text-left">
           <div className="text-3xl sm:text-4xl font-bold">LIFE GROUP</div>
           <div className="mt-4 sm:mt-[19px] text-[18px] ">
-            At NSC, we gather after Sunday Service as a group through which we
-            pray together, learn, grow in faith. We as a group aspire to be a
-            witness of God’s presence.
+            At NSC, we gather after Sunday Service as a group through which we pray together, learn,
+            grow in faith. We as a group aspire to be a witness of God’s presence.
           </div>
           <div className="mt-4 sm:mt-[28px] text-[18px] ">
-            We share our stories, along with fellowship, prayer times, reading
-            scriptures, books.
+            We share our stories, along with fellowship, prayer times, reading scriptures, books.
           </div>
           <Link href="https://tinyurl.com/zw3whc2m" passHref>
             <button className="py-[8px] px-[14px] mt-[36px] border border-black border-[1.5px] rounded-[8px] text-button font-medium tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
@@ -78,18 +76,32 @@ export default function LifeGroupPage() {
           </Link>
         </div>
         <div className="lg:w-1/2 w-full">
-          <img
-            src="/assets/images/life-group-photo1.JPG"
-            className="w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px]"
-          />
+          <div className="relative w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px] overflow-hidden">
+            <Image
+              src="/assets/images/life-group-photo1.JPG"
+              alt="Life Group main photo"
+              fill
+              sizes="(max-width: 640px) 100vw, 100vw"
+              style={{ objectFit: "cover" }}
+              className="rounded-[18px]"
+              priority
+            />
+          </div>
         </div>
       </section>
       <section className="flex flex-col lg:flex-row items-center mt-[85px] py-[31px] gap-6">
         <div className="hidden lg:flex lg:items-center lg:justify-center lg:w-1/2">
-          <img
-            src="/assets/images/life-group-photo2.png"
-            className="w-auto max-w-[800px] h-[200px] sm:h-[308px] rounded-[18px]"
-          />
+          <div className="relative w-auto max-w-[800px] h-[200px] sm:h-[308px] rounded-[18px] overflow-hidden">
+            <Image
+              src="/assets/images/life-group-photo2.png"
+              alt="Life Group secondary photo"
+              width={476}
+              height={294}
+              sizes="(max-width: 800px) 100vw, 800px"
+              style={{ width: "auto", height: "100%" }}
+              className="rounded-[18px]"
+            />
+          </div>
         </div>
         <div className="lg:w-1/2 lg:pr-6 w-full max-w-[470px] text-center lg:text-left">
           {contents.map((data, index) => {
@@ -104,9 +116,7 @@ export default function LifeGroupPage() {
         </div>
       </section>
       <section className="text-center mt-[104px] mb-[97px]">
-        <div className="font-bold text-[28px]">
-          LISTS OF BOOKS WE READ IN OUR LIFE GROUP
-        </div>
+        <div className="font-bold text-[28px]">LISTS OF BOOKS WE READ IN OUR LIFE GROUP</div>
         <div className="flex justify-center">
           <div className="relative mt-[45px]  w-full flex justify-center">
             <button
@@ -138,17 +148,18 @@ export default function LifeGroupPage() {
                 }}
               >
                 {bookList.map((data, index) => (
-                  <div
-                    key={index}
-                    className="w-[203px] sm:w-[203px] flex-shrink-0"
-                  >
-                    <img
-                      src={data.img}
-                      className="h-[auto] max-h-[308px] w-[203px] rounded-[10px] object-cover"
-                    />
-                    <div className="text-[16px] mt-[21px] text-left">
-                      {data.title}
+                  <div key={index} className="w-[203px] sm:w-[203px] flex-shrink-0">
+                    <div className="relative w-[203px] h-[308px] rounded-[10px] overflow-hidden">
+                      <Image
+                        src={data.img}
+                        alt={data.title}
+                        fill
+                        sizes="203px"
+                        style={{ objectFit: "cover" }}
+                        className="rounded-[10px]"
+                      />
                     </div>
+                    <div className="text-[16px] mt-[21px] text-left">{data.title}</div>
                     <div className="text-[16px] mt-[11px] text-left text-[#A8A8A8]">
                       {data.author}
                     </div>
