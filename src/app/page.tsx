@@ -304,7 +304,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mt-[26px] flex  w-max mx-auto">
+            <div className="mt-[26px] flex flex-wrap gap-[16px] w-full justify-center mx-auto">
               {["Discpleship", "Fellowship", "Happiness", "Blessings"].map(
                 (keyword) => (
                   <button
