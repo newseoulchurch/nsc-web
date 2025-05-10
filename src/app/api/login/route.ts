@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({ success: true });
 
     response.cookies.set("adminToken", "mock-admin-token", {
-      httpOnly: true,
       path: "/",
       maxAge: 60 * 60,
     });

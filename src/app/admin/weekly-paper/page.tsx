@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type WeeklyImage = {
+export type WeeklyImage = {
   url: string;
   pathname: string;
   uploadedAt: string;
