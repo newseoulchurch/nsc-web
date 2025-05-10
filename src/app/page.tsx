@@ -18,11 +18,17 @@ export default function Home() {
   const parts = youtubeData[0]?.title.split(/[\]|\:]/) ?? [];
   const [query, setQuery] = useState("");
   const [searchData, setSearchData] = useState<TYoutubeVideo[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(true);
+  const [isYoutubeLoading, setIsYoutubeLoading] = useState(true);
+  const [isEventLoading, setIsEventLoading] = useState(true);
 
   const handleSearch = async (e: KeyboardEvent | null, keyword?: string) => {
     const searchTerm = keyword ?? query;
 
     if ((e === null || e.key === "Enter") && searchTerm.trim()) {
+      setIsSearchLoading(true);
+      setHasSearched(true);
       try {
         const res = await fetch(`/api/sermon/search?q=${searchTerm}`, {
           method: "POST",
@@ -37,11 +43,15 @@ export default function Home() {
         );
       } catch (error) {
         console.error("Search error:", error);
+      } finally {
+        setIsSearchLoading(false);
       }
     }
   };
 
   async function getYoutubeData() {
+    setIsYoutubeLoading(true);
+
     try {
       const res = await fetch("/api/youtube/latest");
       const data = await res.json();
@@ -60,38 +70,48 @@ export default function Home() {
     } catch (error) {
       console.error("Failed to fetch YouTube data:", error);
       return [];
+    } finally {
+      setIsYoutubeLoading(false);
     }
   }
   async function getEvents() {
-    const res = await fetch("/api/events");
-    const data = await res.json();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    setIsEventLoading(true);
+    try {
+      const res = await fetch("/api/events");
+      const data = await res.json();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    const enriched = data.map((event: TEvents) => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
+      const enriched = data.map((event: TEvents) => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
 
-      const status = eventDate < today ? "past" : "upcoming";
-      return { ...event, eventDate, status };
-    });
+        const status = eventDate < today ? "past" : "upcoming";
+        return { ...event, eventDate, status };
+      });
 
-    const sorted = enriched.sort((a, b) => {
-      if (a.status === "upcoming" && b.status === "past") return -1;
-      if (a.status === "past" && b.status === "upcoming") return 1;
+      const sorted = enriched.sort((a, b) => {
+        if (a.status === "upcoming" && b.status === "past") return -1;
+        if (a.status === "past" && b.status === "upcoming") return 1;
 
-      if (a.status === "upcoming" && b.status === "upcoming") {
-        return a.eventDate.getTime() - b.eventDate.getTime();
-      }
-      if (a.status === "past" && b.status === "past") {
-        return b.eventDate.getTime() - a.eventDate.getTime();
-      }
+        if (a.status === "upcoming" && b.status === "upcoming") {
+          return a.eventDate.getTime() - b.eventDate.getTime();
+        }
+        if (a.status === "past" && b.status === "past") {
+          return b.eventDate.getTime() - a.eventDate.getTime();
+        }
 
-      return 0;
-    });
+        return 0;
+      });
 
-    setEventsData(sorted);
+      setEventsData(sorted);
+    } catch (err) {
+      console.error("Failed to fetch events:", err);
+    } finally {
+      setIsEventLoading(false);
+    }
   }
+
   useEffect(() => {
     getYoutubeData();
     getEvents();
@@ -222,35 +242,45 @@ export default function Home() {
 
             {/* Slide */}
             <div className=" flex overflow-x-auto scroll-smooth thin-scrollbar space-x-4">
-              {(eventsData || []).map((data, i) => (
-                <article
-                  key={i}
-                  className="min-w-[280px] sm:w-[327px] flex-shrink-0"
-                >
-                  <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
-                    <Image
-                      src={data.img_url || "/assets/images/default-event.jpg"}
-                      alt={data.title}
-                      fill // makes the image fill the parent div
-                      style={{ objectFit: "cover", objectPosition: "center" }}
-                      sizes="(max-width: 640px) 280px, 327px"
-                      priority={i < 2} // optionally prioritize the first few images
-                    />
-                    <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
-                      {data.status}
-                    </span>
-                    <div className="absolute top-[38px] left-[10px] w-[56px] h-[1px] mt-[28px] bg-white z-10" />
-                    <h4 className="absolute top-[67px] left-[10px] mt-[14px] text-lg sm:text-h3 text-white z-10">
+              {isEventLoading ? (
+                <div className="text-center text-gray-500 py-8 w-full">
+                  Loading events...
+                </div>
+              ) : (
+                (eventsData || []).map((data, i) => (
+                  <article
+                    key={i}
+                    className="min-w-[280px] sm:w-[327px] flex-shrink-0"
+                  >
+                    <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
+                      <Image
+                        src={data.img_url || "/assets/images/default-event.jpg"}
+                        alt={data.title}
+                        fill // makes the image fill the parent div
+                        style={{ objectFit: "cover", objectPosition: "center" }}
+                        sizes="(max-width: 640px) 280px, 327px"
+                        priority={i < 2} // optionally prioritize the first few images
+                      />
+                      <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
+                        {data.status}
+                      </span>
+                      <div className="absolute top-[38px] left-[10px] w-[56px] h-[1px] mt-[28px] bg-white z-10" />
+                      <h4 className="absolute top-[67px] left-[10px] mt-[14px] text-lg sm:text-h3 text-white z-10">
+                        {data.title}
+                      </h4>
+                    </div>
+                    <p className="mt-[10px] text-base font-medium">
                       {data.title}
-                    </h4>
-                  </div>
-                  <p className="mt-[10px] text-base font-medium">
-                    {data.title}
-                  </p>
-                  <p className="mt-[10px] text-base font-medium">{data.date}</p>
-                  <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
-                </article>
-              ))}
+                    </p>
+                    <p className="mt-[10px] text-base font-medium">
+                      {data.date}
+                    </p>
+                    <p className="mt-[4px] text-lightGray text-sm">
+                      {data.time}
+                    </p>
+                  </article>
+                ))
+              )}
             </div>
           </section>
           <section>
@@ -293,28 +323,38 @@ export default function Home() {
 
             <div className="mt-[26px] overflow-x-auto scroll-smooth thin-scrollbar px-4">
               <div className="flex gap-[16px] w-max mx-auto">
-                {searchData.map((data, i) => (
-                  <article
-                    key={i}
-                    className="min-w-[240px] max-w-[240px] flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-100 cursor-pointer"
-                  >
-                    <a
-                      href={data.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-3"
+                {!hasSearched ? null : isSearchLoading ? ( // 검색 전: 아무것도 안 보여줌
+                  <div className="text-center text-gray-500 py-8 w-full">
+                    Loading search results...
+                  </div>
+                ) : searchData.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8 w-full">
+                    No results found.
+                  </div>
+                ) : (
+                  searchData.map((data, i) => (
+                    <article
+                      key={i}
+                      className="min-w-[240px] max-w-[240px] flex-shrink-0 bg-white rounded-lg shadow-sm border border-gray-100 cursor-pointer"
                     >
-                      <img
-                        src={data.thumbnail}
-                        alt="Thumbnail"
-                        className="w-full h-[135px] rounded-md object-cover"
-                      />
-                      <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
-                        {data.title}
-                      </p>
-                    </a>
-                  </article>
-                ))}
+                      <a
+                        href={data.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-3"
+                      >
+                        <img
+                          src={data.thumbnail}
+                          alt="Thumbnail"
+                          className="w-full h-[135px] rounded-md object-cover"
+                        />
+                        <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
+                          {data.title}
+                        </p>
+                      </a>
+                    </article>
+                  ))
+                )}
               </div>
             </div>
           </section>
@@ -402,29 +442,38 @@ export default function Home() {
             </div>
 
             <div className="mt-[26px] flex flex-col gap-[24px] lg:flex-row lg:overflow-x-auto lg:scroll-smooth lg:thin-scrollbar">
-              {(youtubeData || []).map((data, i) => (
-                <article key={i} className="w-full lg:w-[390px] flex-shrink-0">
-                  <a
-                    href={data.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              {isYoutubeLoading ? (
+                <div className="text-center text-gray-500 py-8 w-full">
+                  Loading events...
+                </div>
+              ) : (
+                (youtubeData || []).map((data, i) => (
+                  <article
+                    key={i}
+                    className="w-full lg:w-[390px] flex-shrink-0"
                   >
-                    <div className="w-full h-[219px] bg-gray5 rounded-[12px] overflow-hidden relative">
-                      <Image
-                        src={data.thumbnail}
-                        alt="Thumbnail"
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 100vw, 327px" // Adjust as needed for your layout
-                        style={{ borderRadius: "12px" }}
-                      />
-                    </div>
-                    <p className="mt-[10px] text-base font-medium">
-                      {data.title}
-                    </p>
-                  </a>
-                </article>
-              ))}
+                    <a
+                      href={data.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <div className="w-full h-[219px] bg-gray5 rounded-[12px] overflow-hidden relative">
+                        <Image
+                          src={data.thumbnail}
+                          alt="Thumbnail"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, 327px" // Adjust as needed for your layout
+                          style={{ borderRadius: "12px" }}
+                        />
+                      </div>
+                      <p className="mt-[10px] text-base font-medium">
+                        {data.title}
+                      </p>
+                    </a>
+                  </article>
+                ))
+              )}
             </div>
           </section>
           <section className="mt-[80px] mb-[61px]">
