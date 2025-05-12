@@ -25,27 +25,27 @@ export default function LifeGroupPage() {
     {
       title: "The Bondage Breaker",
       author: "by Neil T. Anderson",
-      img: "/assets/images/books/the-bondage-breaker.jpg",
+      img: "/assets/images/books/the-bondage-breaker.avif",
     },
     {
       title: "Habits of Grace: Enjoying Jesus Through the Spiritual Disciplines",
       author: "by David Mathis",
-      img: "/assets/images/books/habits-of-grace.png",
+      img: "/assets/images/books/habits-of-grace.avif",
     },
     {
       title: "The Inner Voice of Love",
       author: "by Henri Nouwen",
-      img: "/assets/images/books/the-inner-voice.jpg",
+      img: "/assets/images/books/the-inner-voice.avif",
     },
     {
       title: "The Screwtape Letters",
       author: "by C.S. Lewis",
-      img: "/assets/images/books/screwtape-letters.jpg",
+      img: "/assets/images/books/screwtape-letters.avif",
     },
     {
       title: "The Reason for God",
       author: "by Timothy Keller",
-      img: "/assets/images/books/reason-of-god.jpg",
+      img: "/assets/images/books/reason-of-god.avif",
     },
   ];
 
@@ -78,7 +78,7 @@ export default function LifeGroupPage() {
         <div className="lg:w-1/2 w-full">
           <div className="relative w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px] overflow-hidden">
             <Image
-              src="/assets/images/life-group-photo1.JPG"
+              src="/assets/images/life-group-photo1.avif"
               alt="Life Group main photo"
               fill
               sizes="(max-width: 640px) 100vw, 100vw"
