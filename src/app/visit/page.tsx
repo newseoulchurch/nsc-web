@@ -38,7 +38,7 @@ export default function VisitPage() {
 
         <Image
           className="w-full rounded-md"
-          src="/assets/images/nsc-stage.png"
+          src="/assets/images/nsc-stage.avif"
           alt="NSC Stage"
           width={1190}
           height={1000}

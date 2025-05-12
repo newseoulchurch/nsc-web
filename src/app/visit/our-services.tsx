@@ -8,7 +8,7 @@ export default function OurServices() {
       <div className="w-full relative min-h-[555px]">
         <Image
           className="w-full h-[555px] object-cover rounded-md"
-          src="/assets/images/pray-time.png"
+          src="/assets/images/pray-time.avif"
           alt="Pray Time"
           width={2000}
           height={555}

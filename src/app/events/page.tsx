@@ -80,7 +80,7 @@ export default function EventsPage() {
         <div className="lg:w-1/2 w-full">
           <div className="relative w-full h-[200px] sm:h-[308px] bg-gray-200 rounded-[18px] overflow-hidden">
             <Image
-              src="/assets/images/event-main-photo1.jpeg"
+              src="/assets/images/event-main-photo1.avif"
               alt="Event Main Photo"
               fill
               sizes="(max-width: 640px) 100vw, 100vw"

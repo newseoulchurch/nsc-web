@@ -132,7 +132,7 @@ export default function Home() {
             muted
             playsInline
             preload="metadata"
-            src="/assets/videos/main-sermon.mp4"
+            src="/assets/videos/main-sermon-reduced.mp4"
           />
 
           {/* 🔹 Content Overlay */}
@@ -167,7 +167,7 @@ export default function Home() {
           <div
             className="rounded-[14px] flex flex-col items-center justify-center text-center bg-cover bg-center px-4 py-10 sm:py-12"
             style={{
-              backgroundImage: "url('/assets/images/main-back-image1.jpeg')",
+              backgroundImage: "url('/assets/images/main-back-image1.avif')",
               backgroundPosition: "center",
               backgroundSize: "cover",
               minHeight: "300px",
@@ -480,7 +480,7 @@ export default function Home() {
             <div
               className="bg-purple-300 h-[323px] rounded-[14px] flex flex-col items-center justify-center text-center"
               style={{
-                backgroundImage: "url('/assets/images/main-back-image2.png')",
+                backgroundImage: "url('/assets/images/main-back-image2.avif')",
               }}
             >
               <div className="text-div font-bold text-white">
