@@ -88,8 +88,8 @@ async function insertToSupabase(
   publishedAt: string
 ) {
   const { error } = await supabase
-    .from("sermon_vector")
-    .insert([{ id: videoId, title, embedding, publishedAt }]);
+    .from("sermon")
+    .insert({ id: videoId, title, embedding, publishedAt });
   if (error) throw error;
 }
 
@@ -97,6 +97,7 @@ export async function GET(req: Request) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ status: 401 });
   }
+  let processed = [];
   try {
     const videos = await fetchLatestVideos();
     for (const { videoId, title, publishedAt } of videos) {
@@ -109,10 +110,11 @@ export async function GET(req: Request) {
 
       const embedding = await getEmbedding(transcript);
       await insertToSupabase(videoId, title, embedding, publishedAt);
+      processed.push({ videoId, title, publishedAt });
     }
-    return NextResponse.json({ data: videos }, { status: 200 });
+    return NextResponse.json({ data: processed }, { status: 200 });
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
