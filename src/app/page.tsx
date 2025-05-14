@@ -7,6 +7,7 @@ import { TYoutubeVideo } from "@/types/youtube";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { EventCardList } from "@/components/EventCardList";
 // import "./globals.css";
 
 export default function Home() {
@@ -246,41 +247,7 @@ export default function Home() {
                 <div className="text-center text-gray-500 py-8 w-full">
                   Loading events...
                 </div>
-              ) : (
-                (eventsData || []).map((data, i) => (
-                  <article
-                    key={i}
-                    className="min-w-[280px] sm:w-[327px] flex-shrink-0"
-                  >
-                    <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
-                      <Image
-                        src={data.img_url || "/assets/images/default-event.jpg"}
-                        alt={data.title}
-                        fill // makes the image fill the parent div
-                        style={{ objectFit: "cover", objectPosition: "center" }}
-                        sizes="(max-width: 640px) 280px, 327px"
-                        priority={i < 2} // optionally prioritize the first few images
-                      />
-                      <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
-                        {data.status}
-                      </span>
-                      <div className="absolute top-[38px] left-[10px] w-[56px] h-[1px] mt-[28px] bg-white z-10" />
-                      <h4 className="absolute top-[67px] left-[10px] mt-[14px] text-lg sm:text-h3 text-white z-10">
-                        {data.title}
-                      </h4>
-                    </div>
-                    <p className="mt-[10px] text-base font-medium">
-                      {data.title}
-                    </p>
-                    <p className="mt-[10px] text-base font-medium">
-                      {data.date}
-                    </p>
-                    <p className="mt-[4px] text-lightGray text-sm">
-                      {data.time}
-                    </p>
-                  </article>
-                ))
-              )}
+              ) : <EventCardList eventsData={eventsData || []} />}
             </div>
           </section>
           <section>
