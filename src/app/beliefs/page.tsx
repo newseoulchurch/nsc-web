@@ -46,7 +46,7 @@ export default function LifeGroupPage() {
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
-              backgroundImage: `url("/assets/images/ourbeliefs/beliefs-bg.png")`,
+              backgroundImage: `url("/assets/images/ourbeliefs/ourbeliefs_02.avif")`,
             }}
           />
           <div

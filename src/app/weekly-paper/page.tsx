@@ -10,14 +10,16 @@ export default function WeeklyPage() {
   useEffect(() => {
     fetch("/api/upload")
       .then((res) => res.json())
-      .then((data) => setImages(data.filter((item) => item.date !== "unknown")))
+      .then((data) =>
+        setImages(data.filter((item) => item.date !== "unknown").reverse())
+      )
       .finally(() => setIsLoading(false));
   }, []);
 
   return (
     <>
       <section className="py-[16px] px-4 sm:px-[54px]">
-        <div className="w-full bg-[#e9e9e9] rounded-[12px] overflow-hidden">
+        <div className="w-full  rounded-[12px] overflow-hidden">
           <div className="flex flex-col items-center justify-center text-center gap-6 py-6">
             {isLoading ? (
               <div className="text-gray-600 text-base animate-pulse">
