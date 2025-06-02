@@ -10,11 +10,6 @@ export default function loginPage() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    document.cookie = `adminToken=mock-admin-token; path=/; max-age=3600`;
-    // generateSecurePassword();
-  }, []);
-
   // function generateSecurePassword(length = 12) {
   //   const charset =
   //     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}";
