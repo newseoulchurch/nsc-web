@@ -25,15 +25,15 @@ export default function ChurchStaff() {
     },
     {
       id: 3,
-      name: "Victor Lee",
-      description: "Facilities",
-      image: "/assets/images/about/church-staff/VictorGif.gif",
+      name: "Kathy",
+      description: "Women Ministry",
+      image: "/assets/images/about/church-staff/KathyGif.gif",
     },
     {
       id: 4,
-      name: "Elaina Choi",
-      description: "Service",
-      image: "/assets/images/about/church-staff/ElainaGif.gif",
+      name: "Carmen",
+      description: "Kid's Ministry",
+      image: "/assets/images/about/church-staff/CarmenGif.gif",
     },
     {
       id: 5,
@@ -43,15 +43,15 @@ export default function ChurchStaff() {
     },
     {
       id: 6,
-      name: "Thomas Shin",
-      description: "Media",
-      image: "/assets/images/about/church-staff/ThomasGif.gif",
+      name: "Eugene Hong",
+      description: "Worship",
+      image: "/assets/images/about/church-staff/EugeneGif.gif",
     },
     {
       id: 7,
-      name: "Chance Son",
-      description: "Life Groups",
-      image: "/assets/images/about/church-staff/chanceGif.gif",
+      name: "Jaedong Na",
+      description: "Worship",
+      image: "/assets/images/about/church-staff/JaedongGif.gif",
     },
     {
       id: 8,
@@ -79,15 +79,15 @@ export default function ChurchStaff() {
     },
     {
       id: 12,
-      name: "Eugene Hong",
-      description: "Worship",
-      image: "/assets/images/about/church-staff/EugeneGif.gif",
+      name: "Thomas Shin",
+      description: "Media",
+      image: "/assets/images/about/church-staff/ThomasGif.gif",
     },
     {
       id: 13,
-      name: "Jaedong Na",
-      description: "Worship",
-      image: "/assets/images/about/church-staff/JaedongGif.gif",
+      name: "Chance Son",
+      description: "Life Groups",
+      image: "/assets/images/about/church-staff/chanceGif.gif",
     },
     {
       id: 14,
@@ -110,20 +110,20 @@ export default function ChurchStaff() {
     {
       id: 17,
       name: "Enzo Choi",
-      description: "Creative",
+      description: "Sports Ministry",
       image: "/assets/images/about/church-staff/EnzoGif.gif",
     },
     {
       id: 18,
-      name: "Kathy Kim",
-      description: "Creative",
-      image: "/assets/images/about/church-staff/KathyGif.gif",
+      name: "Victor Lee",
+      description: "Facilities",
+      image: "/assets/images/about/church-staff/VictorGif.gif",
     },
     {
       id: 19,
-      name: "Carmen",
-      description: "Kid's Ministry",
-      image: "/assets/images/about/church-staff/CarmenGif.gif",
+      name: "Elaina Choi",
+      description: "Service",
+      image: "/assets/images/about/church-staff/ElainaGif.gif",
     },
   ];
   return (
