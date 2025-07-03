@@ -41,7 +41,7 @@ export default function WeeklyPaperPage() {
       formData.append("file", file);
       formData.append("date", date);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/weekly-upload", {
         method: "POST",
         body: formData,
       });
@@ -63,7 +63,7 @@ export default function WeeklyPaperPage() {
   };
 
   useEffect(() => {
-    fetch("/api/upload")
+    fetch("/api/weekly-upload")
       .then((res) => res.json())
       .then((data) =>
         setImages(data.filter((item) => item.date !== "unknown"))

@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { EventCardList } from "@/components/EventCardList";
+import { collection, getDocs } from "firebase/firestore";
+import { fireStore } from "@/lib/firebase";
 // import "./globals.css";
 
 export default function Home() {
@@ -78,34 +80,26 @@ export default function Home() {
   async function getEvents() {
     setIsEventLoading(true);
     try {
-      const res = await fetch("/api/events");
-      const data = await res.json();
+      const res = await getDocs(collection(fireStore, `events`), {});
+      const events = res.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const sortedEvents = events.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const enriched = data.map((event: TEvents) => {
+      const enriched = sortedEvents.map((event: EventData) => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
-
         const status = eventDate < today ? "past" : "upcoming";
-        return { ...event, eventDate, status };
+        return { ...event, status };
       });
-
-      const sorted = enriched.sort((a, b) => {
-        if (a.status === "upcoming" && b.status === "past") return -1;
-        if (a.status === "past" && b.status === "upcoming") return 1;
-
-        if (a.status === "upcoming" && b.status === "upcoming") {
-          return a.eventDate.getTime() - b.eventDate.getTime();
-        }
-        if (a.status === "past" && b.status === "past") {
-          return b.eventDate.getTime() - a.eventDate.getTime();
-        }
-
-        return 0;
-      });
-
-      setEventsData(sorted);
+      setEventsData(enriched);
     } catch (err) {
       console.error("Failed to fetch events:", err);
     } finally {
@@ -247,7 +241,9 @@ export default function Home() {
                 <div className="text-center text-gray-500 py-8 w-full">
                   Loading events...
                 </div>
-              ) : <EventCardList eventsData={eventsData || []} />}
+              ) : (
+                <EventCardList eventsData={eventsData || []} />
+              )}
             </div>
           </section>
           <section>

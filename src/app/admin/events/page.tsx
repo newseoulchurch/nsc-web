@@ -1,12 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { fireStore } from "@/lib/firebase";
 
 type EventData = {
   title: string;
   date: string;
   time: string;
-  status: string;
   img_url?: string;
   content?: string;
 };
@@ -19,19 +26,34 @@ export default function EventsPage() {
     title: "",
     date: "",
     time: "",
-    status: "",
     img_url: "",
     content: "",
   });
 
+  // const onClickUpLoadButton = async () => {
+  //   //    addDoc(collection(db       , "컬렉션이름") , { 추가할 데이터 }
+  //   await addDoc(collection(fireStore, `events`), {
+  //     value,
+  //   });
+  // };
+
   useEffect(() => {
     async function getEvents() {
-      const res = await fetch("/api/events");
-      const data = await res.json();
+      const res = await getDocs(collection(fireStore, `events`), {});
+      const events = res.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const sortedEvents = events.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
+      console.log("events ID:", sortedEvents);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const enriched = data.map((event: EventData) => {
+      const enriched = sortedEvents.map((event: EventData) => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         const status = eventDate < today ? "past" : "upcoming";
@@ -48,7 +70,6 @@ export default function EventsPage() {
       title: "",
       date: "",
       time: "",
-      status: "",
       img_url: "",
       content: "",
     });
@@ -56,6 +77,10 @@ export default function EventsPage() {
   }
 
   function openEditModal(index: number) {
+    if (!events[index].id) {
+      alert("수정할 문서의 ID가 없습니다. 새로고침 후 다시 시도해주세요.");
+    }
+
     setEditingIndex(index);
     setForm(events[index]);
     setShowModal(true);
@@ -66,14 +91,38 @@ export default function EventsPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (editingIndex !== null) {
       const updated = [...events];
       updated[editingIndex] = form;
       setEvents(updated);
-    } else {
-      setEvents([...events, form]);
+    }
+    try {
+      if (editingIndex !== null) {
+        const updated = [...events];
+        updated[editingIndex] = form;
+        setEvents(updated);
+
+        const docId = (events[editingIndex] as any).id; // 기존 문서 ID 가져오기
+        const docRef = doc(fireStore, "events", docId);
+        await updateDoc(docRef, {
+          ...form,
+          updatedAt: new Date().toISOString(),
+        });
+        console.log("기존 문서 업데이트 완료:", docId);
+      } else {
+        const docRef = await addDoc(collection(fireStore, "events"), {
+          ...form,
+          createdAt: new Date().toISOString(),
+        });
+        console.log("새 문서 생성 완료:", docRef.id);
+
+        setEvents([...events, { ...form, id: docRef.id }]); // 새 문서 로컬 상태에 추가
+      }
+    } catch (err) {
+      console.error("Firestore 저장 중 에러:", err);
+      alert("이벤트 저장 실패!");
     }
     setShowModal(false);
   }
@@ -98,16 +147,23 @@ export default function EventsPage() {
             className="min-w-[280px] sm:w-[327px] flex-shrink-0 cursor-pointer"
           >
             <div
-              className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center relative"
+              className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center relative" // z-0 제거!
               style={{
-                backgroundImage: `url(${data.img_url || "/assets/images/default-event.jpg"})`,
+                backgroundImage:
+                  data.img_url && data.img_url !== ""
+                    ? `url(${data.img_url})`
+                    : "none",
               }}
             >
-              <span className="inline-block p-[4px] rounded-[6px] text-[13px] bg-white">
-                {data.status}
-              </span>
-              <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-              <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
+              {(!data.img_url || data.img_url === "") && (
+                <img
+                  src="/assets/images/events/event1.png"
+                  className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] z-0"
+                />
+              )}
+
+              <div className="w-[56px] h-[1px] mt-[28px] bg-white relative z-10" />
+              <h4 className="mt-[14px] text-lg sm:text-h3 text-white relative z-10">
                 {data.title}
               </h4>
             </div>
@@ -151,31 +207,34 @@ export default function EventsPage() {
                 className="w-full border px-3 py-2 rounded"
                 required
               />
-              {/* <input
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                type="text"
-                placeholder="상태"
-                className="w-full border px-3 py-2 rounded"
-              /> */}
-              {/* <input
-                name="img_url"
-                value={form.img_url}
-                onChange={handleChange}
-                type="text"
-                placeholder="이미지 URL"
-                className="w-full border px-3 py-2 rounded"
-              /> */}
               <input
                 type="file"
                 accept="image/*"
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    // const imageUrl = await uploadFileToBlob(file);
-                    // console.log("보낸다", imageUrl);
-                    // setForm((prev) => ({ ...prev, img_url: imageUrl }));
+                    try {
+                      const date = form.date; // 이미 form.date에 선택한 날짜가 들어있으니 재활용
+                      if (!date) {
+                        alert("날짜를 먼저 선택해주세요!");
+                        return;
+                      }
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      formData.append("date", date);
+
+                      const res = await fetch("/api/events-upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data.error || "업로드 실패");
+                      console.log("Vercel Blob 업로드 완료 URL:", data.url);
+                      setForm((prev) => ({ ...prev, img_url: data.url }));
+                    } catch (err) {
+                      console.error("이미지 업로드 에러:", err);
+                      alert("이미지 업로드 실패!");
+                    }
                   }
                 }}
                 className="w-full border px-3 py-2 rounded"

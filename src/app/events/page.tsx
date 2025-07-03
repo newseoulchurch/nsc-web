@@ -3,6 +3,8 @@ import { TEvents } from "@/types/events";
 import { useEffect, useState } from "react";
 import { EventCardList } from "@/components/EventCardList";
 import Image from "next/image";
+import { collection, getDocs } from "firebase/firestore";
+import { fireStore } from "@/lib/firebase";
 
 export default function EventsPage() {
   const CARD_WIDTH = 390 + 120;
@@ -28,7 +30,10 @@ export default function EventsPage() {
   };
 
   const renderEventCard = (data: TEvents, i: number) => (
-    <article key={i} className="mt-8 sm:mt-[33px] min-w-[280px] sm:w-[327px] flex-shrink-0 ">
+    <article
+      key={i}
+      className="mt-8 sm:mt-[33px] min-w-[280px] sm:w-[327px] flex-shrink-0 "
+    >
       <div
         className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center"
         style={{
@@ -39,7 +44,9 @@ export default function EventsPage() {
           {data.status}
         </span>
         <div className="w-[56px] h-[1px] mt-[28px] bg-white" />
-        <h4 className="mt-[14px] text-lg sm:text-h3 text-white">{data.title}</h4>
+        <h4 className="mt-[14px] text-lg sm:text-h3 text-white">
+          {data.title}
+        </h4>
       </div>
 
       <p className="mt-[10px] text-base font-medium">{data.title}</p>
@@ -48,12 +55,20 @@ export default function EventsPage() {
     </article>
   );
   async function getEvents() {
-    const res = await fetch("/api/events");
-    const data = await res.json();
+    const res = await getDocs(collection(fireStore, `events`), {});
+    const events = res.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    const sortedEvents = events.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime(); // 최신순
+    });
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const enriched = data.map((event: TEvents) => {
+    const enriched = sortedEvents.map((event: EventData) => {
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
 
@@ -93,7 +108,9 @@ export default function EventsPage() {
       <EventCardList eventsData={upcomingEvents} />
 
       <section className="mt-[65px] mb-[27px]">
-        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left mb-6">PAST</div>
+        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left mb-6">
+          PAST
+        </div>
         <EventCardList eventsData={pastEvents} />
 
         {/* TODO: after events setting more */}

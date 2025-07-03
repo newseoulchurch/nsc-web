@@ -1,5 +1,6 @@
 import { TEvents } from "@/types/events";
 import Image from "next/image";
+import { useState } from "react";
 
 interface EventCardProps {
   data: TEvents;
@@ -7,16 +8,24 @@ interface EventCardProps {
 }
 
 export function EventCard({ data, priority = false }: EventCardProps) {
+  const [imgSrc, setImgSrc] = useState(
+    data.img_url || "/assets/images/events/event1.png"
+  );
+
   return (
     <article className="min-w-[280px] sm:w-[327px] flex-shrink-0">
       <div className="relative h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] overflow-hidden">
         <Image
-          src={data.img_url || "/assets/images/default-event.jpg"}
+          src={imgSrc}
           alt={data.title}
           fill
           style={{ objectFit: "cover", objectPosition: "center" }}
           sizes="(max-width: 640px) 280px, 327px"
           priority={priority}
+          onError={() => {
+            console.warn("이미지 로드 실패, 기본 이미지로 대체합니다:", imgSrc);
+            setImgSrc("/assets/images/events/event1.png");
+          }}
         />
         <span className="absolute top-[10px] left-[10px] inline-block p-[4px] rounded-[6px] text-[13px] bg-white z-10">
           {data.status}

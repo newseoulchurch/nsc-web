@@ -14,7 +14,11 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['i.ytimg.com', 'img.youtube.com'],
+    domains: [
+      "i.ytimg.com",
+      "img.youtube.com",
+      "igmgr3ejlj7zobya.public.blob.vercel-storage.com", // ✅ 실제 Vercel Blob 호스트
+    ],
   },
 };
 

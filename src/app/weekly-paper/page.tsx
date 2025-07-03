@@ -8,7 +8,7 @@ export default function WeeklyPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/upload")
+    fetch("/api/weekly-upload")
       .then((res) => res.json())
       .then((data) =>
         setImages(data.filter((item) => item.date !== "unknown").reverse())
