@@ -6,6 +6,7 @@ import ParkingInfo from "@/app/visit/parking-info";
 import PublicTransportInfo from "@/app/visit/public-transport-info";
 import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import OurServices from "@/app/visit/our-services";
+import Address from "./address";
 
 export default function VisitPage() {
   const churchAddress = "서초구 남부순환로 2221";
@@ -93,6 +94,7 @@ export default function VisitPage() {
               Kakao Map
             </Button> */}
           </div>
+          <Address />
           <ParkingInfo />
           <PublicTransportInfo />
         </div>
