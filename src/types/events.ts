@@ -4,4 +4,5 @@ export type TEvents = {
   status: string;
   time: string;
   title: string;
+  link?: string;
 };

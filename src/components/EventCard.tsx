@@ -38,6 +38,14 @@ export function EventCard({ data, priority = false }: EventCardProps) {
       <p className="mt-[10px] text-base font-medium">{data.title}</p>
       <p className="mt-[10px] text-base font-medium">{data.date}</p>
       <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
+      {data.link && (
+        <p
+          className="mt-[4px] text-base font-medium text-blue-600 underline cursor-pointer hover:text-blue-800 transition"
+          onClick={() => window.open(data.link, "_blank")}
+        >
+          Application link
+        </p>
+      )}
     </article>
   );
 }

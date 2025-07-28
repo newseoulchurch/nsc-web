@@ -11,11 +11,13 @@ import {
 import { fireStore } from "@/lib/firebase";
 
 type EventData = {
+  id?: string;
   title: string;
   date: string;
   time: string;
   img_url?: string;
   content?: string;
+  link?: string;
 };
 
 export default function EventsPage() {
@@ -28,6 +30,7 @@ export default function EventsPage() {
     time: "",
     img_url: "",
     content: "",
+    link: "",
   });
 
   // const onClickUpLoadButton = async () => {
@@ -72,6 +75,7 @@ export default function EventsPage() {
       time: "",
       img_url: "",
       content: "",
+      link: "",
     });
     setShowModal(true);
   }
@@ -100,17 +104,16 @@ export default function EventsPage() {
     }
     try {
       if (editingIndex !== null) {
-        const updated = [...events];
-        updated[editingIndex] = form;
-        setEvents(updated);
-
-        const docId = (events[editingIndex] as any).id; // 기존 문서 ID 가져오기
-        const docRef = doc(fireStore, "events", docId);
+        const docRef = doc(fireStore, "events", form?.id);
         await updateDoc(docRef, {
           ...form,
           updatedAt: new Date().toISOString(),
         });
-        console.log("기존 문서 업데이트 완료:", docId);
+        console.log("기존 문서 업데이트 완료:", form.id);
+
+        const updated = [...events];
+        updated[editingIndex] = form;
+        setEvents(updated);
       } else {
         const docRef = await addDoc(collection(fireStore, "events"), {
           ...form,
@@ -170,6 +173,9 @@ export default function EventsPage() {
             <p className="mt-[10px] text-base font-medium">{data.title}</p>
             <p className="mt-[4px] text-base font-medium">{data.date}</p>
             <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
+            <p className="mt-[4px] text-base text-sm">
+              {data.link?.slice(0, 30) + "..."}
+            </p>
           </article>
         ))}
       </div>
@@ -248,6 +254,15 @@ export default function EventsPage() {
                 placeholder="기타 내용"
                 className="w-full border px-3 py-2 rounded"
               />
+              <input
+                name="link"
+                value={form.link}
+                onChange={handleChange}
+                type="url"
+                placeholder="관련 링크"
+                className="w-full border px-3 py-2 rounded"
+              />
+
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
