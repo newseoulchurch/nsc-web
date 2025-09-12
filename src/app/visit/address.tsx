@@ -30,12 +30,14 @@ export default function Address() {
           </button>
         </div>
         <div style={{ display: "flex" }}>
-          <span>2221, Nambu Circular Road, Seocho-gu, Seoul, South Korea</span>
+          <span>
+            2221, Nambusunhwan-ro, Seocho-gu, Seoul, Republic of Korea, 06702
+          </span>
           <button
             onClick={
               () =>
                 handleCopy(
-                  "2221, Nambu Circular Road, Seocho-gu, Seoul, South Korea"
+                  "2221, Nambusunhwan-ro, Seocho-gu, Seoul, Republic of Korea"
                 ) // 익명 함수로 호출
             }
             className="ml-2 text-blue-500 hover:text-blue-700"
