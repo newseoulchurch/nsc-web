@@ -129,9 +129,10 @@ export default function Home() {
             preload="metadata"
             src="/assets/videos/2509mainvideo.mp4"
           />
+          <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
           {/* 🔹 Content Overlay */}
-          <div className="relative z-10 text-black">
+          <div className="relative z-10 text-white">
             <h1 className="text-h1 font-bold">
               {parts[0]?.trim().startsWith("[")
                 ? parts[0]?.trim() + "]"
@@ -150,7 +151,7 @@ export default function Home() {
               rel="noopener noreferrer"
               aria-label="Watch latest sermon"
             >
-              <button className="py-2 px-[14px] mt-[55px] border border-black border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-white hover:text-black transition-colors duration-200">
+              <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
                 WATCH
               </button>
             </a>
