@@ -130,6 +130,16 @@ export default function EventsPage() {
     setShowModal(false);
   }
 
+  function openEditModalById(id: string) {
+    const idx = events.findIndex((e) => e.id === id);
+    if (idx === -1 || !events[idx].id) {
+      alert("수정할 문서의 ID가 없습니다. 새로고침 후 다시 시도해주세요.");
+      return;
+    }
+    setEditingIndex(idx);
+    setForm(events[idx]);
+    setShowModal(true);
+  }
   return (
     <div className="p-10">
       <div className="flex justify-between items-center mb-6">
@@ -143,10 +153,10 @@ export default function EventsPage() {
       </div>
 
       <div className="flex gap-6 overflow-x-auto">
-        {events.map((data, i) => (
+        {events.map((data) => (
           <article
-            key={i}
-            onClick={() => openEditModal(i)}
+            key={data.id ?? data.title}
+            onClick={() => openEditModalById(data.id!)}
             className="min-w-[280px] sm:w-[327px] flex-shrink-0 cursor-pointer"
           >
             <div
@@ -218,29 +228,45 @@ export default function EventsPage() {
                 accept="image/*"
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    try {
-                      const date = form.date; // 이미 form.date에 선택한 날짜가 들어있으니 재활용
-                      if (!date) {
-                        alert("날짜를 먼저 선택해주세요!");
-                        return;
-                      }
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      formData.append("date", date);
+                  if (!file) return;
 
-                      const res = await fetch("/api/events-upload", {
-                        method: "POST",
-                        body: formData,
+                  if (!form.date) {
+                    alert("날짜를 먼저 선택해주세요!");
+                    return;
+                  }
+
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("date", form.date);
+
+                    const res = await fetch("/api/events-upload", {
+                      method: "POST",
+                      body: formData,
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "업로드 실패");
+
+                    // 캐시 방지 쿼리 붙이기
+                    const urlWithBust = `${data.url}?v=${Date.now()}`;
+
+                    // 1) 폼 미리보기 즉시 반영
+                    setForm((prev) => ({ ...prev, img_url: urlWithBust }));
+
+                    // 2) 편집 모드라면 리스트에도 즉시 반영(카드 즉시 변경)
+                    if (editingIndex !== null) {
+                      setEvents((prev) => {
+                        const copy = [...prev];
+                        copy[editingIndex!] = {
+                          ...copy[editingIndex!],
+                          img_url: urlWithBust,
+                        };
+                        return copy;
                       });
-                      const data = await res.json();
-                      if (!res.ok) throw new Error(data.error || "업로드 실패");
-                      console.log("Vercel Blob 업로드 완료 URL:", data.url);
-                      setForm((prev) => ({ ...prev, img_url: data.url }));
-                    } catch (err) {
-                      console.error("이미지 업로드 에러:", err);
-                      alert("이미지 업로드 실패!");
                     }
+                  } catch (err) {
+                    console.error("이미지 업로드 에러:", err);
+                    alert("이미지 업로드 실패!");
                   }
                 }}
                 className="w-full border px-3 py-2 rounded"
