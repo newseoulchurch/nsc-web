@@ -75,9 +75,11 @@ async function getEmbedding(text: string) {
       encoding_format: "float",
     }),
   });
-  if (!res.ok) throw new Error("OpenAI embedding failed");
-  const json = await res.json();
-  return json.data[0].embedding;
+  if (res.ok) {
+    const json = await res.json();
+    return json.data[0].embedding;
+  }
+  return null;
 }
 
 // Helper: Insert into Supabase
@@ -95,7 +97,7 @@ async function insertToSupabase(
 
 export async function GET(req: Request) {
   if (req.headers.get("Authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ status: 401 });
+    return NextResponse.json({ status: 401, message: "No Authorization" });
   }
   let processed = [];
   try {
