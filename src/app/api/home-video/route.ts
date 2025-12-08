@@ -43,23 +43,30 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as {
-      videoUrl: string;
-      titleLine1: string;
+      videoUrl?: string;
+      titleLine1?: string;
       titleLine2?: string;
       watchUrl?: string;
     };
 
-    if (!body.videoUrl || !body.titleLine1) {
-      return NextResponse.json(
-        { error: "videoUrl and titleLine1 required" },
-        { status: 400 }
-      );
-    }
-
+    // 🔹 기존 설정 먼저 조회
     const snap = await getDoc(DOC_REF);
     const prev = snap.exists() ? (snap.data() as HomeVideoConfig) : null;
 
-    if (prev?.videoUrl && prev.videoUrl !== body.videoUrl) {
+    // 🔹 body에 없으면 기존값 사용
+    const nextVideoUrl = body.videoUrl?.trim() || prev?.videoUrl || "";
+    const nextTitleLine1 = (body.titleLine1 ?? "").toString() || "";
+    const nextTitleLine2 = (body.titleLine2 ?? "").toString() || "";
+    const nextWatchUrl =
+      (body.watchUrl ?? "").toString() || prev?.watchUrl || "";
+
+    // 🔹 진짜로 아무 영상도 없는 경우에만 에러
+    if (!nextVideoUrl) {
+      return NextResponse.json({ error: "videoUrl required" }, { status: 400 });
+    }
+
+    // 🔹 새 videoUrl이 들어왔고, 이전과 다를 때만 이전 Blob 삭제
+    if (prev?.videoUrl && body.videoUrl && prev.videoUrl !== body.videoUrl) {
       try {
         await del(prev.videoUrl);
       } catch (delErr) {
@@ -68,10 +75,10 @@ export async function POST(request: Request) {
     }
 
     const newConfig: HomeVideoConfig = {
-      videoUrl: body.videoUrl,
-      titleLine1: body.titleLine1,
-      titleLine2: body.titleLine2 ?? "",
-      watchUrl: body.watchUrl ?? "",
+      videoUrl: nextVideoUrl,
+      titleLine1: nextTitleLine1,
+      titleLine2: nextTitleLine2,
+      watchUrl: nextWatchUrl,
       updatedAt: new Date().toISOString(),
     };
 

@@ -41,8 +41,8 @@ export default function Home() {
     : parts[0]?.trim();
   const defaultLine2 = parts[1]?.trim();
 
-  const line1 = homeVideo?.titleLine1 || defaultLine1;
-  const line2 = homeVideo?.titleLine2 || defaultLine2;
+  const line1 = homeVideo?.titleLine1 ?? "";
+  const line2 = homeVideo?.titleLine2 ?? "";
 
   const defaultWatchUrl = "https://www.youtube.com/@newseoulchurch";
   const watchUrl = homeVideo?.watchUrl?.trim() || defaultWatchUrl;
@@ -187,7 +187,7 @@ export default function Home() {
               aria-label="Watch latest sermon"
             >
               <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
-                Word is Life
+                WORD IS LIFE{" "}
               </button>
             </a>
           </div>

@@ -7,6 +7,7 @@ type HomeVideoConfig = {
   videoUrl: string;
   titleLine1: string;
   titleLine2?: string;
+  watchUrl?: string;
   updatedAt: string;
 };
 
@@ -44,32 +45,39 @@ export default function HomeVideoForm() {
     setMessage(null);
 
     const file = inputFileRef.current?.files?.[0];
-    if (!file) {
+
+    // 🔹 완전 첫 저장(기존 영상 없음)인데 파일도 없으면 에러
+    if (!file && !currentConfig?.videoUrl) {
       setMessage("영상을 선택해주세요.");
-      return;
-    }
-    if (!titleLine1.trim()) {
-      setMessage("메인 제목(첫 줄)은 필수입니다.");
       return;
     }
 
     setIsSaving(true);
     try {
-      const blob: PutBlobResult = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/home-video/upload",
-        multipart: true,
-        clientPayload: "home-main-video",
-      });
+      // 🔹 기본값: 기존 영상 URL
+      let finalVideoUrl = currentConfig?.videoUrl ?? "";
+
+      // 🔹 새 파일이 있을 때만 Blob 업로드
+      if (file) {
+        const blob: PutBlobResult = await upload(file.name, file, {
+          access: "public",
+          handleUploadUrl: "/api/home-video/upload",
+          multipart: true,
+          clientPayload: "home-main-video",
+          // addRandomSuffix: true,
+        });
+
+        finalVideoUrl = blob.url;
+      }
 
       const metaRes = await fetch("/api/home-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoUrl: blob.url,
-          titleLine1: titleLine1.trim(),
+          videoUrl: finalVideoUrl,
+          titleLine1: titleLine1.trim(), // 비어 있어도 그대로 전송
           titleLine2: titleLine2.trim(),
-          watchUrl: watchUrl.trim(), // 🔹 추가
+          watchUrl: watchUrl.trim(),
         }),
       });
 
@@ -81,6 +89,10 @@ export default function HomeVideoForm() {
       const saved = (await metaRes.json()) as HomeVideoConfig;
       setCurrentConfig(saved);
       setMessage("저장되었습니다.");
+
+      if (inputFileRef.current) {
+        inputFileRef.current.value = "";
+      }
     } catch (err: any) {
       console.error(err);
       setMessage(err.message || "저장 중 오류가 발생했습니다.");
@@ -92,7 +104,7 @@ export default function HomeVideoForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
       <div className="space-y-2">
-        <label className="block font-semibold">메인 제목 (첫 줄)</label>
+        <label className="block font-semibold">메인 제목 (첫 줄, 선택)</label>
         <input
           type="text"
           className="w-full border rounded px-3 py-2"
@@ -103,15 +115,16 @@ export default function HomeVideoForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="block font-semibold">서브 제목 (둘째 줄)</label>
+        <label className="block font-semibold">설교자 (둘째 줄, 선택)</label>
         <input
           type="text"
           className="w-full border rounded px-3 py-2"
           value={titleLine2}
           onChange={(e) => setTitleLine2(e.target.value)}
-          placeholder="예: THIS IS THE KINGDOM"
+          placeholder="예: PASTOR JOE OH"
         />
       </div>
+
       <div className="space-y-2">
         <label className="block font-semibold">WATCH 버튼 YouTube URL</label>
         <input
