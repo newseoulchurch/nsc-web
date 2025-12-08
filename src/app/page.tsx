@@ -12,6 +12,14 @@ import { collection, getDocs } from "firebase/firestore";
 import { fireStore } from "@/lib/firebase";
 // import "./globals.css";
 
+type HomeVideoConfig = {
+  videoUrl: string;
+  titleLine1: string;
+  titleLine2?: string;
+  watchUrl?: string;
+  updatedAt: string;
+};
+
 export default function Home() {
   const isOpen = useIsOpen();
 
@@ -25,6 +33,19 @@ export default function Home() {
   const [isSearchLoading, setIsSearchLoading] = useState(true);
   const [isYoutubeLoading, setIsYoutubeLoading] = useState(true);
   const [isEventLoading, setIsEventLoading] = useState(true);
+  const [homeVideo, setHomeVideo] = useState<THomeVideo | null>(null);
+  const [isHomeVideoLoading, setIsHomeVideoLoading] = useState(true);
+
+  const defaultLine1 = parts[0]?.trim().startsWith("[")
+    ? parts[0]?.trim() + "]"
+    : parts[0]?.trim();
+  const defaultLine2 = parts[1]?.trim();
+
+  const line1 = homeVideo?.titleLine1 || defaultLine1;
+  const line2 = homeVideo?.titleLine2 || defaultLine2;
+
+  const defaultWatchUrl = "https://www.youtube.com/@newseoulchurch";
+  const watchUrl = homeVideo?.watchUrl?.trim() || defaultWatchUrl;
 
   const handleSearch = async (e: KeyboardEvent | null, keyword?: string) => {
     const searchTerm = keyword ?? query;
@@ -106,11 +127,27 @@ export default function Home() {
       setIsEventLoading(false);
     }
   }
+  async function getHomeVideoConfig() {
+    setIsHomeVideoLoading(true);
+    try {
+      const res = await fetch("/api/home-video", { cache: "no-store" });
+      console.log("//res", res);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data) setHomeVideo(data);
+    } catch (err) {
+      console.error("Failed to fetch home video config:", err);
+    } finally {
+      setIsHomeVideoLoading(false);
+    }
+  }
 
   useEffect(() => {
     getYoutubeData();
     getEvents();
+    getHomeVideoConfig();
   }, []);
+
   return (
     <>
       {/* {!!isOpen ? (
@@ -127,18 +164,16 @@ export default function Home() {
             muted
             playsInline
             preload="metadata"
-            src="/assets/videos/2509mainvideo.mp4"
+            src={homeVideo?.videoUrl || "/assets/videos/2509mainvideo.mp4"}
           />
           <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
           {/* 🔹 Content Overlay */}
           <div className="relative z-10 text-white">
             <h1 className="text-h1 font-bold">
-              {parts[0]?.trim().startsWith("[")
-                ? parts[0]?.trim() + "]"
-                : parts[0]?.trim()}
+              {line1}
               <br />
-              {parts[1]?.trim()}
+              {line2}
             </h1>
             {/* <p className="mt-[22px] text-[18px] leading-[100%]">
                 THE BLIND SPOTS IN OUR LIVES THAT
@@ -146,13 +181,13 @@ export default function Home() {
               </p> */}
 
             <a
-              href="https://www.youtube.com/@newseoulchurch" // ← 여기에 교회 채널 주소 넣으세요
+              href={watchUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Watch latest sermon"
             >
               <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
-                WATCH
+                Word is Life
               </button>
             </a>
           </div>

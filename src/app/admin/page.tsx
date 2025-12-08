@@ -1,3 +1,4 @@
+// app/admin/page.tsx
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -18,6 +19,9 @@ export default async function AdminPage() {
         </a>
         <a href="/admin/weekly-paper" className="underline text-blue-500">
           주보 관리
+        </a>
+        <a href="/admin/home-video" className="underline text-blue-500">
+          홈 화면 영상 설정
         </a>
       </div>
     </div>
