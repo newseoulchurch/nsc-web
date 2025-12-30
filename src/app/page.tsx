@@ -157,21 +157,37 @@ export default function Home() {
         {/* Hero Section */}
         {/* 🔹 Background Video */}
 
-        {homeVideo?.videoUrl ? (
-          <section className="relative flex flex-col items-center justify-center h-[920px] p-10 text-center overflow-hidden">
+        <section className="relative flex flex-col items-center justify-center h-[920px] p-10 text-center overflow-hidden">
+          {homeVideo?.videoUrl ? (
             <video
-              className="absolute top-0 left-0 w-full h-full object-cover z-0"
+              className={[
+                "absolute inset-0 w-full h-full object-cover",
+                "transition-opacity duration-[1200ms] ease-out",
+                "delay-[200ms]",
+                isHomeVideoLoading ? "opacity-0" : "opacity-100",
+              ].join(" ")}
               autoPlay
               loop
               muted
               playsInline
-              preload="metadata"
-              src={homeVideo?.videoUrl}
+              preload="auto"
+              src={homeVideo.videoUrl}
+              poster="/assets/images/nscBackgroundImage.jpeg"
+              onLoadedData={() => setIsHomeVideoLoading(false)}
+              onCanPlay={() => setIsHomeVideoLoading(false)}
             />
+          ) : (
+            <img
+              src="/assets/images/nscBackgroundImage.jpeg"
+              alt="bg image"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
 
-            <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
-            {/* 🔹 Content Overlay */}
+          {/* 🔹 Content Overlay */}
+          {homeVideo?.videoUrl && (
             <div className="relative z-10 text-white">
               <h1 className="text-h1 font-bold">
                 {line1}
@@ -194,14 +210,8 @@ export default function Home() {
                 </button>
               </a>
             </div>
-          </section>
-        ) : (
-          <img
-            src="/assets/images/nscBackgroundImage.jpeg"
-            alt="bg image"
-            className="absolute top-0 left-0 w-full h-full object-cover z-0"
-          />
-        )}
+          )}
+        </section>
 
         <section className="mt-[68px] mb-[61px] px-4 lg:px-[54px]">
           {/* Sunday Service */}
