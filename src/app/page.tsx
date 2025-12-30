@@ -155,43 +155,53 @@ export default function Home() {
       ) : ( */}
       <main>
         {/* Hero Section */}
-        <section className="relative flex flex-col items-center justify-center h-[920px] p-10 text-center overflow-hidden">
-          {/* 🔹 Background Video */}
-          <video
-            className="absolute top-0 left-0 w-full h-full object-cover z-0"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            src={homeVideo?.videoUrl || "/assets/videos/2509mainvideo.mp4"}
-          />
-          <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+        {/* 🔹 Background Video */}
 
-          {/* 🔹 Content Overlay */}
-          <div className="relative z-10 text-white">
-            <h1 className="text-h1 font-bold">
-              {line1}
-              <br />
-              {line2}
-            </h1>
-            {/* <p className="mt-[22px] text-[18px] leading-[100%]">
+        {homeVideo?.videoUrl ? (
+          <section className="relative flex flex-col items-center justify-center h-[920px] p-10 text-center overflow-hidden">
+            <video
+              className="absolute top-0 left-0 w-full h-full object-cover z-0"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              src={homeVideo?.videoUrl}
+            />
+
+            <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+
+            {/* 🔹 Content Overlay */}
+            <div className="relative z-10 text-white">
+              <h1 className="text-h1 font-bold">
+                {line1}
+                <br />
+                {line2}
+              </h1>
+              {/* <p className="mt-[22px] text-[18px] leading-[100%]">
                 THE BLIND SPOTS IN OUR LIVES THAT
                 <br /> STOP US FROM REFLECTING GOD’S GLORY
               </p> */}
 
-            <a
-              href={watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Watch latest sermon"
-            >
-              <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
-                WORD IS LIFE{" "}
-              </button>
-            </a>
-          </div>
-        </section>
+              <a
+                href={watchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Watch latest sermon"
+              >
+                <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
+                  WORD IS LIFE{" "}
+                </button>
+              </a>
+            </div>
+          </section>
+        ) : (
+          <img
+            src="/assets/images/nscBackgroundImage.jpeg"
+            alt="bg image"
+            className="absolute top-0 left-0 w-full h-full object-cover z-0"
+          />
+        )}
 
         <section className="mt-[68px] mb-[61px] px-4 lg:px-[54px]">
           {/* Sunday Service */}

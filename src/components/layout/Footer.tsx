@@ -1,6 +1,6 @@
-"use client"
-import Image from "next/image"
-import { FooterPage } from "@/types/footer"
+"use client";
+import Image from "next/image";
+import { FooterPage } from "@/types/footer";
 export default function Footer() {
   const pageList: FooterPage[] = [
     {
@@ -46,7 +46,7 @@ export default function Footer() {
         },
       ],
     },
-  ]
+  ];
 
   return (
     <footer className="bg-black py-[39px] px-[54px]">
@@ -70,10 +70,9 @@ export default function Footer() {
                 {data.list.map((_list, j) => (
                   <a
                     onClick={() => {
-                      router.push(_list.url)
+                      router.push(_list.url);
                     }}
                     target="_self"
-
                     key={j}
                     href={_list.url}
                     className="text-gray4 font-bold text-sm hover:text-white"
@@ -86,9 +85,12 @@ export default function Footer() {
           ))}
         </div>
       </div>
-      <div className="flex flex-col items-center md:items-start">
+      <div className="flex w-full flex-col items-center gap-2 md:flex-row md:items-center md:justify-between">
         <div className="mt-[60px] text-white leading-[100%] text-sm">@NSC</div>
+        <div className="mt-[60px] text-white leading-[100%] text-sm">
+          Senior pastor Joe Oh 010-2380-9189
+        </div>
       </div>
     </footer>
-  )
+  );
 }
