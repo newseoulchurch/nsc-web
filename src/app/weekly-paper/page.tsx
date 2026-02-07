@@ -30,17 +30,17 @@ export default function WeeklyPage() {
                 No weekly paper found.
               </div>
             ) : (
-              // 26/2/3 TODOLIST Blob store Hard lock됨
-              // <img
-              //   src={images[0].url}
-              //   alt="Weekly Paper"
-              //   className="w-full max-w-[768px] h-auto rounded-lg shadow-lg"
-              // />
               <img
-                src="/assets/images/weeklypaper.png"
+                src={images[0].url}
                 alt="Weekly Paper"
                 className="w-full max-w-[768px] h-auto rounded-lg shadow-lg"
               />
+              // 26/2/3 TODOLIST Blob store Hard lock됨
+              // <img
+              //   src="/assets/images/weeklypaper.png"
+              //   alt="Weekly Paper"
+              //   className="w-full max-w-[768px] h-auto rounded-lg shadow-lg"
+              // />
             )}
           </div>
         </div>
