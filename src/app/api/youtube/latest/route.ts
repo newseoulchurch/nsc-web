@@ -4,6 +4,8 @@ import { NextResponse, NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase";
 
+export const revalidate = 3600; // cache for 1 hour — sermon list updates at most once/week
+
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
