@@ -74,11 +74,16 @@ export default function HomeVideoForm() {
     };
     ffmpeg.on("log", onLog);
 
+    // Target 800KB to stay safely under 1MB
+    const targetBitrateKbps = Math.floor((800 * 8) / Math.max(duration, 1));
+
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
     await ffmpeg.exec([
       "-i", "input.mp4",
       "-c:v", "libx264",
-      "-crf", "29",
+      "-b:v", `${targetBitrateKbps}k`,
+      "-maxrate", `${targetBitrateKbps}k`,
+      "-bufsize", `${targetBitrateKbps * 2}k`,
       "-preset", "ultrafast",
       "-vf", "scale=960:540",
       "-an",
@@ -129,14 +134,16 @@ export default function HomeVideoForm() {
 
       // 🔹 새 파일이 있을 때만 Blob 업로드
       if (file) {
-        setIsCompressing(true);
         let uploadFile = file;
-        try {
-          uploadFile = await compressVideo(file);
-        } catch (compressErr) {
-          console.warn("Compression failed, uploading original:", compressErr);
-        } finally {
-          setIsCompressing(false);
+        if (file.size > 1 * 1024 * 1024) {
+          setIsCompressing(true);
+          try {
+            uploadFile = await compressVideo(file);
+          } catch (compressErr) {
+            console.warn("Compression failed, uploading original:", compressErr);
+          } finally {
+            setIsCompressing(false);
+          }
         }
 
         const blob: PutBlobResult = await upload(uploadFile.name, uploadFile, {
