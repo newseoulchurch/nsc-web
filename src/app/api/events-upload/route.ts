@@ -2,6 +2,8 @@ import { list } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
+export const revalidate = 300; // cache events list for 5 minutes
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File;

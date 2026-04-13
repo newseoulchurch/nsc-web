@@ -4,5 +4,19 @@
       "path": "/api/sermon/ingest",
       "schedule": "0 18 * * 2"
     }
+  ],
+  "headers": [
+    {
+      "source": "/assets/videos/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+      ]
+    }
   ]
 }

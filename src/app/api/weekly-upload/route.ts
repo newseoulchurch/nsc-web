@@ -2,6 +2,8 @@ import { list } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
+export const revalidate = 3600; // weekly papers don't change intra-day
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File;
