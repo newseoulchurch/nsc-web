@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { upload, type PutBlobResult } from "@vercel/blob/client";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
 type HomeVideoConfig = {
   videoUrl: string;
@@ -13,14 +15,45 @@ type HomeVideoConfig = {
 
 export default function HomeVideoForm() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
+  const ffmpegRef = useRef<FFmpeg | null>(null);
   const [currentConfig, setCurrentConfig] = useState<HomeVideoConfig | null>(
     null
   );
   const [titleLine1, setTitleLine1] = useState("");
   const [titleLine2, setTitleLine2] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [watchUrl, setWatchUrl] = useState("");
+
+  const loadFFmpeg = async (): Promise<FFmpeg> => {
+    if (ffmpegRef.current) return ffmpegRef.current;
+    const ffmpeg = new FFmpeg();
+    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+    });
+    ffmpegRef.current = ffmpeg;
+    return ffmpeg;
+  };
+
+  const compressVideo = async (file: File): Promise<File> => {
+    const ffmpeg = await loadFFmpeg();
+    await ffmpeg.writeFile("input.mp4", await fetchFile(file));
+    await ffmpeg.exec([
+      "-i", "input.mp4",
+      "-c:v", "libx264",
+      "-crf", "29",
+      "-preset", "slow",
+      "-vf", "scale=960:540",
+      "-an",
+      "-movflags", "+faststart",
+      "output.mp4",
+    ]);
+    const data = await ffmpeg.readFile("output.mp4");
+    return new File([data], file.name, { type: "video/mp4" });
+  };
 
   useEffect(() => {
     (async () => {
@@ -59,7 +92,17 @@ export default function HomeVideoForm() {
 
       // 🔹 새 파일이 있을 때만 Blob 업로드
       if (file) {
-        const blob: PutBlobResult = await upload(file.name, file, {
+        setIsCompressing(true);
+        let uploadFile = file;
+        try {
+          uploadFile = await compressVideo(file);
+        } catch (compressErr) {
+          console.warn("Compression failed, uploading original:", compressErr);
+        } finally {
+          setIsCompressing(false);
+        }
+
+        const blob: PutBlobResult = await upload(uploadFile.name, uploadFile, {
           access: "public",
           handleUploadUrl: "/api/home-video/upload",
           multipart: true,
@@ -166,10 +209,10 @@ export default function HomeVideoForm() {
 
       <button
         type="submit"
-        disabled={isSaving}
+        disabled={isSaving || isCompressing}
         className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
       >
-        {isSaving ? "저장 중..." : "저장"}
+        {isCompressing ? "압축 중..." : isSaving ? "저장 중..." : "저장"}
       </button>
 
       {message && <p className="text-sm mt-2">{message}</p>}
