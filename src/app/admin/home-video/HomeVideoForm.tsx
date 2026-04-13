@@ -149,9 +149,7 @@ export default function HomeVideoForm() {
         const blob: PutBlobResult = await upload(uploadFile.name, uploadFile, {
           access: "public",
           handleUploadUrl: "/api/home-video/upload",
-          multipart: true,
           clientPayload: "home-main-video",
-          // addRandomSuffix: true,
         });
 
         finalVideoUrl = blob.url;
