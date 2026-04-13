@@ -23,6 +23,7 @@ export default function HomeVideoForm() {
   const [titleLine2, setTitleLine2] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [compressProgress, setCompressProgress] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [watchUrl, setWatchUrl] = useState("");
 
@@ -40,17 +41,23 @@ export default function HomeVideoForm() {
 
   const compressVideo = async (file: File): Promise<File> => {
     const ffmpeg = await loadFFmpeg();
+    setCompressProgress(0);
+    ffmpeg.on("progress", ({ progress }) => {
+      setCompressProgress(Math.round(Math.min(progress, 1) * 100));
+    });
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
     await ffmpeg.exec([
       "-i", "input.mp4",
       "-c:v", "libx264",
       "-crf", "29",
-      "-preset", "slow",
+      "-preset", "ultrafast",
       "-vf", "scale=960:540",
       "-an",
       "-movflags", "+faststart",
       "output.mp4",
     ]);
+    ffmpeg.off("progress", () => {});
+    setCompressProgress(100);
     const data = await ffmpeg.readFile("output.mp4");
     return new File([data], file.name, { type: "video/mp4" });
   };
@@ -212,8 +219,26 @@ export default function HomeVideoForm() {
         disabled={isSaving || isCompressing}
         className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
       >
-        {isCompressing ? "압축 중..." : isSaving ? "저장 중..." : "저장"}
+        {isCompressing ? `압축 중... ${compressProgress}%` : isSaving ? "저장 중..." : "저장"}
       </button>
+
+      {isCompressing && (
+        <div className="space-y-1">
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${compressProgress}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-500">
+            브라우저에서 영상을 압축하는 중입니다. 잠시만 기다려 주세요.
+          </p>
+        </div>
+      )}
+
+      {isSaving && !isCompressing && (
+        <p className="text-xs text-gray-500">Vercel에 업로드 중...</p>
+      )}
 
       {message && <p className="text-sm mt-2">{message}</p>}
     </form>
