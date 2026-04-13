@@ -30,7 +30,7 @@ export default function HomeVideoForm() {
   const loadFFmpeg = async (): Promise<FFmpeg> => {
     if (ffmpegRef.current) return ffmpegRef.current;
     const ffmpeg = new FFmpeg();
-    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
+    const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
       wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
@@ -39,12 +39,33 @@ export default function HomeVideoForm() {
     return ffmpeg;
   };
 
+  const getVideoDuration = (file: File): Promise<number> =>
+    new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(url);
+        resolve(video.duration);
+      };
+      video.onerror = () => resolve(0);
+      video.src = url;
+    });
+
   const compressVideo = async (file: File): Promise<File> => {
     const ffmpeg = await loadFFmpeg();
     setCompressProgress(0);
-    ffmpeg.on("progress", ({ progress }) => {
-      setCompressProgress(Math.round(Math.min(progress, 1) * 100));
-    });
+
+    const duration = await getVideoDuration(file);
+    const onProgress = ({ time }: { time: number }) => {
+      if (duration > 0) {
+        // time is in microseconds
+        const pct = Math.round(Math.min((time / 1_000_000 / duration) * 100, 99));
+        setCompressProgress(pct);
+      }
+    };
+    ffmpeg.on("progress", onProgress);
+
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
     await ffmpeg.exec([
       "-i", "input.mp4",
@@ -56,7 +77,8 @@ export default function HomeVideoForm() {
       "-movflags", "+faststart",
       "output.mp4",
     ]);
-    ffmpeg.off("progress", () => {});
+
+    ffmpeg.off("progress", onProgress);
     setCompressProgress(100);
     const data = await ffmpeg.readFile("output.mp4");
     return new File([data], file.name, { type: "video/mp4" });
