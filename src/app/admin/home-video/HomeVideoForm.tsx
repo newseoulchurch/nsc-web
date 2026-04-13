@@ -57,14 +57,22 @@ export default function HomeVideoForm() {
     setCompressProgress(0);
 
     const duration = await getVideoDuration(file);
-    const onProgress = ({ time }: { time: number }) => {
+
+    // Log-based progress is more reliable than the progress event
+    const onLog = ({ message }: { message: string }) => {
       if (duration > 0) {
-        // time is in microseconds
-        const pct = Math.round(Math.min((time / 1_000_000 / duration) * 100, 99));
-        setCompressProgress(pct);
+        const match = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.?\d*)/);
+        if (match) {
+          const time =
+            parseInt(match[1]) * 3600 +
+            parseInt(match[2]) * 60 +
+            parseFloat(match[3]);
+          const pct = Math.round(Math.min((time / duration) * 100, 99));
+          setCompressProgress(pct);
+        }
       }
     };
-    ffmpeg.on("progress", onProgress);
+    ffmpeg.on("log", onLog);
 
     await ffmpeg.writeFile("input.mp4", await fetchFile(file));
     await ffmpeg.exec([
@@ -78,7 +86,7 @@ export default function HomeVideoForm() {
       "output.mp4",
     ]);
 
-    ffmpeg.off("progress", onProgress);
+    ffmpeg.off("log", onLog);
     setCompressProgress(100);
     const data = await ffmpeg.readFile("output.mp4");
     return new File([data], file.name, { type: "video/mp4" });

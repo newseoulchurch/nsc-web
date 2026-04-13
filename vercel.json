@@ -7,19 +7,6 @@
   ],
   "headers": [
     {
-      "source": "/admin/home-video",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
-      ]
-    },
-    {
-      "source": "/_next/static/(.*)",
-      "headers": [
-        { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
-      ]
-    },
-    {
       "source": "/assets/videos/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }
