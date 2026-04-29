@@ -18,7 +18,10 @@ type EventData = {
   img_url?: string;
   content?: string;
   link?: string;
+  status?: "past" | "upcoming";
 };
+
+const TARGET_IMAGE_SIZE = 500 * 1024; // 500KB
 
 export default function EventsPage() {
   const [showModal, setShowModal] = useState(false);
@@ -33,42 +36,50 @@ export default function EventsPage() {
     link: "",
   });
 
-  // const onClickUpLoadButton = async () => {
-  //   //    addDoc(collection(db       , "컬렉션이름") , { 추가할 데이터 }
-  //   await addDoc(collection(fireStore, `events`), {
-  //     value,
-  //   });
-  // };
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [imageMessage, setImageMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function getEvents() {
-      const res = await getDocs(collection(fireStore, `events`), {});
-      const events = res.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const res = await getDocs(collection(fireStore, "events"));
+      const fetchedEvents = res.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<EventData, "id">),
       }));
-      const sortedEvents = events.sort((a, b) => {
+
+      const sortedEvents = fetchedEvents.sort((a, b) => {
         const dateA = new Date(a.date);
         const dateB = new Date(b.date);
         return dateB.getTime() - dateA.getTime(); // 최신순
       });
+
       console.log("events ID:", sortedEvents);
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const enriched = sortedEvents.map((event: EventData) => {
+      const enriched = sortedEvents.map((event) => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         const status = eventDate < today ? "past" : "upcoming";
-        return { ...event, status };
+
+        return {
+          ...event,
+          status,
+        } as EventData;
       });
+
       setEvents(enriched);
     }
+
     getEvents();
   }, []);
 
   function openNewModal() {
     setEditingIndex(null);
+    setImageFile(null);
+    setImageMessage(null);
     setForm({
       title: "",
       date: "",
@@ -80,13 +91,18 @@ export default function EventsPage() {
     setShowModal(true);
   }
 
-  function openEditModal(index: number) {
-    if (!events[index].id) {
+  function openEditModalById(id: string) {
+    const idx = events.findIndex((e) => e.id === id);
+
+    if (idx === -1 || !events[idx].id) {
       alert("수정할 문서의 ID가 없습니다. 새로고침 후 다시 시도해주세요.");
+      return;
     }
 
-    setEditingIndex(index);
-    setForm(events[index]);
+    setEditingIndex(idx);
+    setImageFile(null);
+    setImageMessage(null);
+    setForm(events[idx]);
     setShowModal(true);
   }
 
@@ -95,51 +111,231 @@ export default function EventsPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
+  const compressImageToUnder500KB = async (file: File): Promise<File> => {
+    if (!file.type.startsWith("image/")) {
+      throw new Error("이미지 파일만 업로드할 수 있습니다.");
+    }
+
+    // 이미 500KB 이하이면 그대로 업로드
+    if (file.size <= TARGET_IMAGE_SIZE) {
+      return file;
+    }
+
+    const imageBitmap = await createImageBitmap(file);
+
+    let width = imageBitmap.width;
+    let height = imageBitmap.height;
+
+    // 1차 해상도 제한
+    const MAX_WIDTH = 1600;
+
+    if (width > MAX_WIDTH) {
+      const ratio = MAX_WIDTH / width;
+      width = MAX_WIDTH;
+      height = Math.round(height * ratio);
+    }
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Canvas 생성에 실패했습니다.");
+    }
+
+    const renderToBlob = async (
+      targetWidth: number,
+      targetHeight: number,
+      quality: number,
+    ): Promise<Blob> => {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+      // PNG 투명 배경이 JPEG 변환 시 검게 나오는 것을 방지
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+      ctx.drawImage(imageBitmap, 0, 0, targetWidth, targetHeight);
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", quality);
+      });
+
+      if (!blob) {
+        throw new Error("이미지 압축에 실패했습니다.");
+      }
+
+      return blob;
+    };
+
+    let blob = await renderToBlob(width, height, 0.85);
+
+    // 1단계: 품질을 낮추며 압축
+    let quality = 0.75;
+
+    while (blob.size > TARGET_IMAGE_SIZE && quality >= 0.35) {
+      blob = await renderToBlob(width, height, quality);
+      quality -= 0.1;
+    }
+
+    // 2단계: 그래도 크면 해상도 축소
+    while (blob.size > TARGET_IMAGE_SIZE && width > 600) {
+      width = Math.round(width * 0.85);
+      height = Math.round(height * 0.85);
+      blob = await renderToBlob(width, height, 0.5);
+    }
+
+    // 3단계: 마지막 강제 축소
+    while (blob.size > TARGET_IMAGE_SIZE && width > 400) {
+      width = Math.round(width * 0.8);
+      height = Math.round(height * 0.8);
+      blob = await renderToBlob(width, height, 0.4);
+    }
+
+    if (blob.size > TARGET_IMAGE_SIZE) {
+      throw new Error(
+        `이미지를 500KB 이하로 압축하지 못했습니다. 현재 용량: ${(
+          blob.size / 1024
+        ).toFixed(0)}KB`,
+      );
+    }
+
+    const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+    return new File([blob], `${originalName}-compressed.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    setImageFile(null);
+    setImageMessage(null);
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setImageMessage("이미지 파일만 업로드할 수 있습니다.");
+      e.target.value = "";
+      return;
+    }
+
+    setIsCompressingImage(true);
+
+    try {
+      const compressedFile = await compressImageToUnder500KB(file);
+
+      setImageFile(compressedFile);
+
+      setImageMessage(
+        `이미지 압축 완료: ${(file.size / 1024).toFixed(0)}KB → ${(
+          compressedFile.size / 1024
+        ).toFixed(0)}KB`,
+      );
+
+      const previewUrl = URL.createObjectURL(compressedFile);
+
+      setForm((prev) => ({
+        ...prev,
+        img_url: previewUrl,
+      }));
+    } catch (err: any) {
+      console.error("이미지 압축 에러:", err);
+      alert(err.message || "이미지 압축 실패!");
+      setImageMessage(err.message || "이미지 압축 실패!");
+    } finally {
+      setIsCompressingImage(false);
+    }
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (editingIndex !== null) {
-      const updated = [...events];
-      updated[editingIndex] = form;
-      setEvents(updated);
+
+    if (isCompressingImage) {
+      alert("이미지 압축이 끝난 뒤 저장해주세요.");
+      return;
     }
+
     try {
+      let finalImageUrl = form.img_url || "";
+
+      // 새 이미지가 선택된 경우에만 서버 API로 Blob 업로드
+      if (imageFile) {
+        if (imageFile.size > TARGET_IMAGE_SIZE) {
+          alert("이미지 용량이 500KB를 초과하여 업로드할 수 없습니다.");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("date", form.date || "no-date");
+
+        const res = await fetch("/api/events-upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "이미지 업로드 실패");
+        }
+
+        finalImageUrl = `${data.url}?v=${Date.now()}`;
+      }
+
+      const saveData = {
+        ...form,
+        img_url: finalImageUrl,
+      };
+
       if (editingIndex !== null) {
-        const docRef = doc(fireStore, "events", form?.id);
+        if (!form.id) {
+          alert("수정할 문서의 ID가 없습니다. 새로고침 후 다시 시도해주세요.");
+          return;
+        }
+
+        const docRef = doc(fireStore, "events", form.id);
+
         await updateDoc(docRef, {
-          ...form,
+          ...saveData,
           updatedAt: new Date().toISOString(),
         });
-        console.log("기존 문서 업데이트 완료:", form.id);
 
         const updated = [...events];
-        updated[editingIndex] = form;
+        updated[editingIndex] = {
+          ...saveData,
+          id: form.id,
+        };
+
         setEvents(updated);
       } else {
         const docRef = await addDoc(collection(fireStore, "events"), {
-          ...form,
+          ...saveData,
           createdAt: new Date().toISOString(),
         });
-        console.log("새 문서 생성 완료:", docRef.id);
 
-        setEvents([...events, { ...form, id: docRef.id }]); // 새 문서 로컬 상태에 추가
+        setEvents([
+          ...events,
+          {
+            ...saveData,
+            id: docRef.id,
+          },
+        ]);
       }
-    } catch (err) {
-      console.error("Firestore 저장 중 에러:", err);
-      alert("이벤트 저장 실패!");
+
+      setShowModal(false);
+      setImageFile(null);
+      setImageMessage(null);
+    } catch (err: any) {
+      console.error("이벤트 저장 중 에러:", err);
+      alert(err.message || "이벤트 저장 실패!");
     }
-    setShowModal(false);
   }
 
-  function openEditModalById(id: string) {
-    const idx = events.findIndex((e) => e.id === id);
-    if (idx === -1 || !events[idx].id) {
-      alert("수정할 문서의 ID가 없습니다. 새로고침 후 다시 시도해주세요.");
-      return;
-    }
-    setEditingIndex(idx);
-    setForm(events[idx]);
-    setShowModal(true);
-  }
   return (
     <div className="p-10">
       <div className="flex justify-between items-center mb-6">
@@ -160,7 +356,7 @@ export default function EventsPage() {
             className="min-w-[280px] sm:w-[327px] flex-shrink-0 cursor-pointer"
           >
             <div
-              className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center relative" // z-0 제거!
+              className="h-[220px] sm:h-[266px] pt-[10px] pl-[10px] bg-gray-300 rounded-[12px] bg-cover bg-center relative"
               style={{
                 backgroundImage:
                   data.img_url && data.img_url !== ""
@@ -172,6 +368,7 @@ export default function EventsPage() {
                 <img
                   src="/assets/images/events/event1.png"
                   className="absolute top-0 left-0 w-full h-full object-cover rounded-[12px] z-0"
+                  alt=""
                 />
               )}
 
@@ -180,11 +377,12 @@ export default function EventsPage() {
                 {data.title}
               </h4>
             </div>
+
             <p className="mt-[10px] text-base font-medium">{data.title}</p>
             <p className="mt-[4px] text-base font-medium">{data.date}</p>
             <p className="mt-[4px] text-lightGray text-sm">{data.time}</p>
             <p className="mt-[4px] text-base text-sm">
-              {data.link?.slice(0, 30) + "..."}
+              {data.link ? data.link.slice(0, 30) + "..." : ""}
             </p>
           </article>
         ))}
@@ -196,6 +394,7 @@ export default function EventsPage() {
             <h3 className="text-lg font-bold mb-2">
               {editingIndex !== null ? "이벤트 수정" : "이벤트 등록"}
             </h3>
+
             <form className="space-y-2" onSubmit={handleSubmit}>
               <input
                 name="title"
@@ -206,6 +405,7 @@ export default function EventsPage() {
                 className="w-full border px-3 py-2 rounded"
                 required
               />
+
               <input
                 name="date"
                 value={form.date}
@@ -214,6 +414,7 @@ export default function EventsPage() {
                 className="w-full border px-3 py-2 rounded"
                 required
               />
+
               <input
                 name="time"
                 value={form.time}
@@ -223,54 +424,30 @@ export default function EventsPage() {
                 className="w-full border px-3 py-2 rounded"
                 required
               />
+
               <input
                 type="file"
                 accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-
-                  if (!form.date) {
-                    alert("날짜를 먼저 선택해주세요!");
-                    return;
-                  }
-
-                  try {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    formData.append("date", form.date);
-
-                    const res = await fetch("/api/events-upload", {
-                      method: "POST",
-                      body: formData,
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || "업로드 실패");
-
-                    // 캐시 방지 쿼리 붙이기
-                    const urlWithBust = `${data.url}?v=${Date.now()}`;
-
-                    // 1) 폼 미리보기 즉시 반영
-                    setForm((prev) => ({ ...prev, img_url: urlWithBust }));
-
-                    // 2) 편집 모드라면 리스트에도 즉시 반영(카드 즉시 변경)
-                    if (editingIndex !== null) {
-                      setEvents((prev) => {
-                        const copy = [...prev];
-                        copy[editingIndex!] = {
-                          ...copy[editingIndex!],
-                          img_url: urlWithBust,
-                        };
-                        return copy;
-                      });
-                    }
-                  } catch (err) {
-                    console.error("이미지 업로드 에러:", err);
-                    alert("이미지 업로드 실패!");
-                  }
-                }}
+                onChange={handleImageChange}
                 className="w-full border px-3 py-2 rounded"
               />
+
+              {isCompressingImage && (
+                <p className="text-sm text-gray-500">
+                  이미지를 500KB 이하로 압축하고 업로드하는 중입니다...
+                </p>
+              )}
+
+              {imageMessage && (
+                <p className="text-sm text-gray-500">{imageMessage}</p>
+              )}
+
+              {form.img_url && (
+                <div
+                  className="w-full h-[160px] rounded bg-cover bg-center border"
+                  style={{ backgroundImage: `url(${form.img_url})` }}
+                />
+              )}
 
               <input
                 name="content"
@@ -280,6 +457,7 @@ export default function EventsPage() {
                 placeholder="기타 내용"
                 className="w-full border px-3 py-2 rounded"
               />
+
               <input
                 name="link"
                 value={form.link}
@@ -292,16 +470,22 @@ export default function EventsPage() {
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setImageFile(null);
+                    setImageMessage(null);
+                  }}
                   className="px-3 py-1 border rounded"
                 >
                   취소
                 </button>
+
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                  disabled={isCompressingImage}
+                  className="bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-60"
                 >
-                  저장
+                  {isCompressingImage ? "이미지 처리 중..." : "저장"}
                 </button>
               </div>
             </form>
