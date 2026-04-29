@@ -4,8 +4,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
-import { useIsOpen } from "@/hooks/useIsOpen.ts";
-import UpdateBlocker from "../UpdateBlocker";
 
 export default function Header() {
   const pathname = usePathname();
@@ -35,6 +33,7 @@ export default function Header() {
   const adminNavLinks = [
     { href: "/admin/events", label: "이벤트 관리" },
     { href: "/admin/weekly-paper", label: "주보 관리" },
+    { href: "/admin/home-video", label: "홈 화면 영상 설정" },
   ];
 
   useEffect(() => {

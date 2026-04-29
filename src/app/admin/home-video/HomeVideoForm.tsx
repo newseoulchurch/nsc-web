@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { upload, type PutBlobResult } from "@vercel/blob/client";
+import { upload } from "@vercel/blob/client";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
@@ -17,7 +17,7 @@ export default function HomeVideoForm() {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [currentConfig, setCurrentConfig] = useState<HomeVideoConfig | null>(
-    null
+    null,
   );
   const [titleLine1, setTitleLine1] = useState("");
   const [titleLine2, setTitleLine2] = useState("");
@@ -26,6 +26,12 @@ export default function HomeVideoForm() {
   const [compressProgress, setCompressProgress] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [watchUrl, setWatchUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
+  const [originalFileSize, setOriginalFileSize] = useState<number | null>(null);
+  const [compressedFileSize, setCompressedFileSize] = useState<number | null>(
+    null,
+  );
 
   const loadFFmpeg = async (): Promise<FFmpeg> => {
     if (ffmpegRef.current) return ffmpegRef.current;
@@ -33,68 +39,109 @@ export default function HomeVideoForm() {
     const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+      wasmURL: await toBlobURL(
+        `${baseURL}/ffmpeg-core.wasm`,
+        "application/wasm",
+      ),
     });
     ffmpegRef.current = ffmpeg;
     return ffmpeg;
   };
 
-  const getVideoDuration = (file: File): Promise<number> =>
-    new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.onloadedmetadata = () => {
-        URL.revokeObjectURL(url);
-        resolve(video.duration);
-      };
-      video.onerror = () => resolve(0);
-      video.src = url;
-    });
+  const makeCompressedFileName = (name: string) => {
+    const baseName = name.replace(/\.[^/.]+$/, "");
+    return `${baseName}-compressed-10s.mp4`;
+  };
 
   const compressVideo = async (file: File): Promise<File> => {
     const ffmpeg = await loadFFmpeg();
     setCompressProgress(0);
 
-    const duration = await getVideoDuration(file);
+    const MAX_DURATION = 10; // 앞 10초만 사용
+    const TARGET_SIZE_MB = 1.5;
+    const TARGET_SIZE_KB = TARGET_SIZE_MB * 1024;
 
-    // Log-based progress is more reliable than the progress event
+    // 컨테이너 오버헤드와 인코딩 오차를 고려해 약간 낮게 설정
+    const SAFE_TARGET_KB = TARGET_SIZE_KB * 0.9;
+
+    // 10초 기준 목표 bitrate
+    const targetBitrateKbps = Math.max(
+      100,
+      Math.floor((SAFE_TARGET_KB * 8) / MAX_DURATION),
+    );
+
     const onLog = ({ message }: { message: string }) => {
-      if (duration > 0) {
-        const match = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.?\d*)/);
-        if (match) {
-          const time =
-            parseInt(match[1]) * 3600 +
-            parseInt(match[2]) * 60 +
-            parseFloat(match[3]);
-          const pct = Math.round(Math.min((time / duration) * 100, 99));
-          setCompressProgress(pct);
-        }
+      const match = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.?\d*)/);
+
+      if (match) {
+        const time =
+          parseInt(match[1]) * 3600 +
+          parseInt(match[2]) * 60 +
+          parseFloat(match[3]);
+
+        const pct = Math.round(Math.min((time / MAX_DURATION) * 100, 99));
+        setCompressProgress(pct);
       }
     };
+
     ffmpeg.on("log", onLog);
 
-    // Target 800KB to stay safely under 1MB
-    const targetBitrateKbps = Math.floor((800 * 8) / Math.max(duration, 1));
+    try {
+      await ffmpeg.writeFile("input", await fetchFile(file));
 
-    await ffmpeg.writeFile("input.mp4", await fetchFile(file));
-    await ffmpeg.exec([
-      "-i", "input.mp4",
-      "-c:v", "libx264",
-      "-b:v", `${targetBitrateKbps}k`,
-      "-maxrate", `${targetBitrateKbps}k`,
-      "-bufsize", `${targetBitrateKbps * 2}k`,
-      "-preset", "ultrafast",
-      "-vf", "scale=960:540",
-      "-an",
-      "-movflags", "+faststart",
-      "output.mp4",
-    ]);
+      await ffmpeg.exec([
+        "-i",
+        "input",
 
-    ffmpeg.off("log", onLog);
-    setCompressProgress(100);
-    const data = await ffmpeg.readFile("output.mp4");
-    return new File([data], file.name, { type: "video/mp4" });
+        // 앞 10초만 사용
+        "-t",
+        String(MAX_DURATION),
+
+        // 비디오 압축
+        "-c:v",
+        "libx264",
+        "-b:v",
+        `${targetBitrateKbps}k`,
+        "-maxrate",
+        `${targetBitrateKbps}k`,
+        "-bufsize",
+        `${targetBitrateKbps * 2}k`,
+
+        // 웹 메인 루프 영상용 설정
+        "-preset",
+        "veryfast",
+        "-vf",
+        "scale='min(854,iw)':-2,fps=24",
+
+        // 오디오 제거
+        "-an",
+
+        // 웹 재생 최적화
+        "-movflags",
+        "+faststart",
+
+        "output.mp4",
+      ]);
+
+      setCompressProgress(100);
+
+      const data = await ffmpeg.readFile("output.mp4");
+      const outputBlob = new Blob([data], { type: "video/mp4" });
+
+      return new File([outputBlob], makeCompressedFileName(file.name), {
+        type: "video/mp4",
+      });
+    } finally {
+      ffmpeg.off("log", onLog);
+
+      // ffmpeg 메모리 파일 정리
+      try {
+        await ffmpeg.deleteFile("input");
+        await ffmpeg.deleteFile("output.mp4");
+      } catch {
+        // cleanup 실패는 무시
+      }
+    }
   };
 
   useEffect(() => {
@@ -115,11 +162,54 @@ export default function HomeVideoForm() {
     })();
   }, []);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+
+    setMessage(null);
+    setSelectedFile(file);
+    setCompressedFile(null);
+    setOriginalFileSize(file?.size ?? null);
+    setCompressedFileSize(null);
+    setCompressProgress(0);
+
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      setMessage("비디오 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    setIsCompressing(true);
+
+    try {
+      const result = await compressVideo(file);
+
+      setCompressedFile(result);
+      setCompressedFileSize(result.size);
+
+      if (result.size > 1.5 * 1024 * 1024) {
+        setMessage(
+          `앞 10초로 잘라 압축했지만 1.5MB를 초과했습니다. 현재 용량: ${(result.size / 1024 / 1024).toFixed(2)}MB`,
+        );
+      } else {
+        setMessage(
+          `앞 10초 영상으로 압축 완료되었습니다. 압축 후 용량: ${(result.size / 1024 / 1024).toFixed(2)}MB`,
+        );
+      }
+    } catch (err) {
+      console.error("Compression failed:", err);
+      setMessage("영상 압축 중 오류가 발생했습니다.");
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
 
-    const file = inputFileRef.current?.files?.[0];
+    const file =
+      compressedFile ?? selectedFile ?? inputFileRef.current?.files?.[0];
 
     // 🔹 완전 첫 저장(기존 영상 없음)인데 파일도 없으면 에러
     if (!file && !currentConfig?.videoUrl) {
@@ -134,21 +224,12 @@ export default function HomeVideoForm() {
 
       // 🔹 새 파일이 있을 때만 Blob 업로드
       if (file) {
-        let uploadFile = file;
-        if (file.size > 1 * 1024 * 1024) {
-          setIsCompressing(true);
-          try {
-            uploadFile = await compressVideo(file);
-          } catch (compressErr) {
-            console.warn("Compression failed, uploading original:", compressErr);
-          } finally {
-            setIsCompressing(false);
-          }
-        }
+        const uploadFile = file;
 
         const blob: PutBlobResult = await upload(uploadFile.name, uploadFile, {
           access: "public",
           handleUploadUrl: "/api/home-video/upload",
+          multipart: true,
           clientPayload: "home-main-video",
         });
 
@@ -233,7 +314,25 @@ export default function HomeVideoForm() {
           accept="video/mp4,video/webm"
           className="w-full"
           required={!currentConfig?.videoUrl}
+          onChange={handleFileChange}
         />
+        {originalFileSize && (
+          <p className="text-xs text-gray-500">
+            원본 용량: {(originalFileSize / 1024 / 1024).toFixed(2)}MB
+          </p>
+        )}
+
+        {compressedFileSize && (
+          <p className="text-xs text-gray-500">
+            압축 후 용량: {(compressedFileSize / 1024 / 1024).toFixed(2)}MB
+          </p>
+        )}
+
+        {compressedFile && (
+          <p className="text-xs text-gray-500">
+            업로드 대상: 앞 10초로 잘린 압축 영상
+          </p>
+        )}
       </div>
 
       {currentConfig?.videoUrl && (
@@ -254,7 +353,11 @@ export default function HomeVideoForm() {
         disabled={isSaving || isCompressing}
         className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
       >
-        {isCompressing ? `압축 중... ${compressProgress}%` : isSaving ? "저장 중..." : "저장"}
+        {isCompressing
+          ? `압축 중... ${compressProgress}%`
+          : isSaving
+            ? "저장 중..."
+            : "저장"}
       </button>
 
       {isCompressing && (
