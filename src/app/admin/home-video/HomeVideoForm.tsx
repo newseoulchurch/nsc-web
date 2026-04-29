@@ -1,110 +1,37 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { upload, type PutBlobResult } from "@vercel/blob/client";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { fetchFile, toBlobURL } from "@ffmpeg/util";
+import { useEffect, useState } from "react";
 
 type HomeVideoConfig = {
-  videoUrl: string;
+  videoUrl: string; // 홈 배경용 YouTube URL
   titleLine1: string;
   titleLine2?: string;
-  watchUrl?: string;
+  watchUrl?: string; // WATCH 버튼용 YouTube URL
   updatedAt: string;
 };
 
 export default function HomeVideoForm() {
-  const inputFileRef = useRef<HTMLInputElement | null>(null);
-  const ffmpegRef = useRef<FFmpeg | null>(null);
   const [currentConfig, setCurrentConfig] = useState<HomeVideoConfig | null>(
-    null
+    null,
   );
+  const [videoUrl, setVideoUrl] = useState("");
   const [titleLine1, setTitleLine1] = useState("");
   const [titleLine2, setTitleLine2] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isCompressing, setIsCompressing] = useState(false);
-  const [compressProgress, setCompressProgress] = useState(0);
-  const [message, setMessage] = useState<string | null>(null);
   const [watchUrl, setWatchUrl] = useState("");
-
-  const loadFFmpeg = async (): Promise<FFmpeg> => {
-    if (ffmpegRef.current) return ffmpegRef.current;
-    const ffmpeg = new FFmpeg();
-    const baseURL = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
-    });
-    ffmpegRef.current = ffmpeg;
-    return ffmpeg;
-  };
-
-  const getVideoDuration = (file: File): Promise<number> =>
-    new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.onloadedmetadata = () => {
-        URL.revokeObjectURL(url);
-        resolve(video.duration);
-      };
-      video.onerror = () => resolve(0);
-      video.src = url;
-    });
-
-  const compressVideo = async (file: File): Promise<File> => {
-    const ffmpeg = await loadFFmpeg();
-    setCompressProgress(0);
-
-    const duration = await getVideoDuration(file);
-
-    // Log-based progress is more reliable than the progress event
-    const onLog = ({ message }: { message: string }) => {
-      if (duration > 0) {
-        const match = message.match(/time=(\d{2}):(\d{2}):(\d{2}\.?\d*)/);
-        if (match) {
-          const time =
-            parseInt(match[1]) * 3600 +
-            parseInt(match[2]) * 60 +
-            parseFloat(match[3]);
-          const pct = Math.round(Math.min((time / duration) * 100, 99));
-          setCompressProgress(pct);
-        }
-      }
-    };
-    ffmpeg.on("log", onLog);
-
-    // Target 800KB to stay safely under 1MB
-    const targetBitrateKbps = Math.floor((800 * 8) / Math.max(duration, 1));
-
-    await ffmpeg.writeFile("input.mp4", await fetchFile(file));
-    await ffmpeg.exec([
-      "-i", "input.mp4",
-      "-c:v", "libx264",
-      "-b:v", `${targetBitrateKbps}k`,
-      "-maxrate", `${targetBitrateKbps}k`,
-      "-bufsize", `${targetBitrateKbps * 2}k`,
-      "-preset", "ultrafast",
-      "-vf", "scale=960:540",
-      "-an",
-      "-movflags", "+faststart",
-      "output.mp4",
-    ]);
-
-    ffmpeg.off("log", onLog);
-    setCompressProgress(100);
-    const data = await ffmpeg.readFile("output.mp4");
-    return new File([data], file.name, { type: "video/mp4" });
-  };
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch("/api/home-video", { cache: "no-store" });
         if (!res.ok) return;
+
         const data = await res.json();
+
         if (data) {
           setCurrentConfig(data);
+          setVideoUrl(data.videoUrl ?? "");
           setTitleLine1(data.titleLine1 ?? "");
           setTitleLine2(data.titleLine2 ?? "");
           setWatchUrl(data.watchUrl ?? "");
@@ -119,48 +46,20 @@ export default function HomeVideoForm() {
     e.preventDefault();
     setMessage(null);
 
-    const file = inputFileRef.current?.files?.[0];
-
-    // 🔹 완전 첫 저장(기존 영상 없음)인데 파일도 없으면 에러
-    if (!file && !currentConfig?.videoUrl) {
-      setMessage("영상을 선택해주세요.");
+    if (!videoUrl.trim()) {
+      setMessage("홈 배경용 YouTube URL을 입력해주세요.");
       return;
     }
 
     setIsSaving(true);
+
     try {
-      // 🔹 기본값: 기존 영상 URL
-      let finalVideoUrl = currentConfig?.videoUrl ?? "";
-
-      // 🔹 새 파일이 있을 때만 Blob 업로드
-      if (file) {
-        let uploadFile = file;
-        if (file.size > 1 * 1024 * 1024) {
-          setIsCompressing(true);
-          try {
-            uploadFile = await compressVideo(file);
-          } catch (compressErr) {
-            console.warn("Compression failed, uploading original:", compressErr);
-          } finally {
-            setIsCompressing(false);
-          }
-        }
-
-        const blob: PutBlobResult = await upload(uploadFile.name, uploadFile, {
-          access: "public",
-          handleUploadUrl: "/api/home-video/upload",
-          clientPayload: "home-main-video",
-        });
-
-        finalVideoUrl = blob.url;
-      }
-
       const metaRes = await fetch("/api/home-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          videoUrl: finalVideoUrl,
-          titleLine1: titleLine1.trim(), // 비어 있어도 그대로 전송
+          videoUrl: videoUrl.trim(),
+          titleLine1: titleLine1.trim(),
           titleLine2: titleLine2.trim(),
           watchUrl: watchUrl.trim(),
         }),
@@ -174,10 +73,6 @@ export default function HomeVideoForm() {
       const saved = (await metaRes.json()) as HomeVideoConfig;
       setCurrentConfig(saved);
       setMessage("저장되었습니다.");
-
-      if (inputFileRef.current) {
-        inputFileRef.current.value = "";
-      }
     } catch (err: any) {
       console.error(err);
       setMessage(err.message || "저장 중 오류가 발생했습니다.");
@@ -188,6 +83,21 @@ export default function HomeVideoForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
+      <div className="space-y-2">
+        <label className="block font-semibold">홈 배경용 YouTube URL</label>
+        <input
+          type="url"
+          className="w-full border rounded px-3 py-2"
+          value={videoUrl}
+          onChange={(e) => setVideoUrl(e.target.value)}
+          placeholder="예: https://www.youtube.com/shorts/VIDEO_ID"
+        />
+        <p className="text-xs text-gray-500">
+          홈 메인 배경에서 무한 반복될 영상입니다. 일부공개 YouTube URL도
+          가능합니다.
+        </p>
+      </div>
+
       <div className="space-y-2">
         <label className="block font-semibold">메인 제목 (첫 줄, 선택)</label>
         <input
@@ -220,60 +130,33 @@ export default function HomeVideoForm() {
           placeholder="예: https://www.youtube.com/watch?v=..."
         />
         <p className="text-xs text-gray-500">
-          비워두면 기본 채널 주소(https://www.youtube.com/@newseoulchurch)를
-          사용합니다.
+          WORD IS LIFE 버튼을 눌렀을 때 이동할 YouTube URL입니다.
         </p>
-      </div>
-
-      <div className="space-y-2">
-        <label className="block font-semibold">홈 영상 파일 (mp4 / webm)</label>
-        <input
-          ref={inputFileRef}
-          type="file"
-          accept="video/mp4,video/webm"
-          className="w-full"
-          required={!currentConfig?.videoUrl}
-        />
       </div>
 
       {currentConfig?.videoUrl && (
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
-            현재 적용 중인 영상 (미리보기)
+            현재 적용 중인 배경 YouTube URL
           </p>
-          <video
-            src={currentConfig.videoUrl}
-            controls
-            className="w-full max-h-64 border rounded"
-          />
+          <a
+            href={currentConfig.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 underline break-all"
+          >
+            {currentConfig.videoUrl}
+          </a>
         </div>
       )}
 
       <button
         type="submit"
-        disabled={isSaving || isCompressing}
+        disabled={isSaving}
         className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-60"
       >
-        {isCompressing ? `압축 중... ${compressProgress}%` : isSaving ? "저장 중..." : "저장"}
+        {isSaving ? "저장 중..." : "저장"}
       </button>
-
-      {isCompressing && (
-        <div className="space-y-1">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${compressProgress}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-500">
-            브라우저에서 영상을 압축하는 중입니다. 잠시만 기다려 주세요.
-          </p>
-        </div>
-      )}
-
-      {isSaving && !isCompressing && (
-        <p className="text-xs text-gray-500">Vercel에 업로드 중...</p>
-      )}
 
       {message && <p className="text-sm mt-2">{message}</p>}
     </form>

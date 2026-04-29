@@ -1,45 +1,58 @@
-import { list } from "@vercel/blob";
-import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
+import { NextResponse } from "next/server";
 
-export const revalidate = 300; // cache events list for 5 minutes
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
 
-export async function POST(req: NextRequest) {
-  const formData = await req.formData();
-  const file = formData.get("file") as File;
-  console.log("[events-upload] file:", file);
-  if (!file) {
-    console.log("[events-upload] Missing file or date");
+    const file = formData.get("file");
+    const date = formData.get("date");
 
-    return NextResponse.json({ error: "파일 또는 날짜 없음" }, { status: 400 });
-  }
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "파일이 없습니다." }, { status: 400 });
+    }
 
-  const ext = file.name.split(".").pop();
-  const uniqueSuffix = Math.random().toString(36).substring(2, 8);
-  const fileName = `events/${uniqueSuffix}.${ext}`;
+    if (file.size > 500 * 1024) {
+      return NextResponse.json(
+        {
+          error: `파일 용량이 500KB를 초과했습니다. 현재 용량: ${Math.round(
+            file.size / 1024,
+          )}KB`,
+        },
+        { status: 400 },
+      );
+    }
 
-  const { url } = await put(fileName, file, {
-    access: "public",
-  });
-  console.log("[events-upload] Uploaded file:", url);
+    const safeDate =
+      typeof date === "string" && date.trim() !== ""
+        ? date.replace(/[^0-9-]/g, "")
+        : "no-date";
 
-  return NextResponse.json({
-    url,
-    pathname: fileName,
-    uploadedAt: new Date().toISOString(),
-  });
-}
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
-export async function GET() {
-  const { blobs } = await list({ prefix: "events/" });
+    const blob = await put(
+      `events/${safeDate}/${Date.now()}-${safeFileName}`,
+      file,
+      {
+        access: "public",
+        addRandomSuffix: false,
+      },
+    );
 
-  const results = blobs.map((blob) => {
-    return {
+    return NextResponse.json({
       url: blob.url,
-      pathname: blob.pathname,
-      uploadedAt: blob.uploadedAt,
-    };
-  });
+    });
+  } catch (error) {
+    console.error("events-upload error:", error);
 
-  return NextResponse.json(results);
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "이미지 업로드에 실패했습니다.",
+      },
+      { status: 500 },
+    );
+  }
 }
