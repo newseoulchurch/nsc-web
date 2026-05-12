@@ -73,10 +73,19 @@ export default function LifeGroupPage() {
             CONFESSIONAL STATEMENT
           </h1>
           <div className="w-full max-w-[800px] shadow-xl overflow-hidden border border-gray-300 rounded-[12px]">
+            {/* iOS Safari does not render PDFs in iframes — show a link on mobile */}
+            <a
+              href="/assets/pdfs/confessional.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sm:hidden flex items-center justify-center gap-2 w-full py-6 text-base font-medium text-black hover:underline"
+            >
+              View Confessional Statement (PDF)
+            </a>
             <iframe
               src="/assets/pdfs/confessional.pdf#zoom=page-width"
               title="Confessional Statement"
-              className="w-full h-[500px] sm:h-[800px]"
+              className="hidden sm:block w-full h-[800px]"
             />
           </div>
         </div>

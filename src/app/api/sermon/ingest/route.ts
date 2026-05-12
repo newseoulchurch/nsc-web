@@ -14,24 +14,25 @@ const youtube = google.youtube({
   auth: YOUTUBE_API_KEY,
 });
 
-// Helper: Fetch latest 3 long videos with "Pastor Sermon" in title
+// Helper: Fetch latest sermon videos
+// Sermon titles follow the pattern: "[Series] Title | Pastor [Name] | New Seoul Church (NSC)"
+// Worship videos follow: "Sunday Service Worship | [Date]" — excluded by title filter
 async function fetchLatestVideos() {
   const params: youtube_v3.Params$Resource$Search$List = {
     part: ["snippet"],
     channelId: CHANNEL_ID,
-    q: "Pastor Sermon",
+    q: "New Seoul Church NSC",
     type: ["video"],
-    videoDuration: "long",
     order: "date",
-    maxResults: 5,
+    maxResults: 10,
   };
   const res = await youtube.search.list(params);
   return (
     res.data.items
-      ?.filter(
-        (item) =>
-          item.snippet?.description?.includes("Sermon")
-      )
+      ?.filter((item) => {
+        const title = item.snippet?.title ?? "";
+        return title.includes("| Pastor") && title.includes("New Seoul Church");
+      })
       .map((item) => ({
         videoId: item.id?.videoId,
         title: item.snippet?.title || "",
