@@ -1,4 +1,10 @@
 import VisionCards from "./VisionCards";
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Our Beliefs",
+  description: "Learn about the vision and theology of New Seoul Church.",
+}
 
 export default function LifeGroupPage() {
   return (

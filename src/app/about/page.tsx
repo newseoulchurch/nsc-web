@@ -3,6 +3,12 @@
 import React from "react";
 import Image from "next/image";
 import ChurchStaff from "@/app/about/church-staff";
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Meet the staff and community of New Seoul Church.",
+}
 export default function AboutUsPage() {
   return (
     <div className="px-4 sm:px-[85px]">
