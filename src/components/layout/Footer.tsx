@@ -44,6 +44,10 @@ export default function Footer() {
           title: "INSTAGRAM",
           url: "https://www.instagram.com/nsc_newseoulchurch/",
         },
+        {
+          title: "TIKTOK",
+          url: "https://www.tiktok.com/@new.seoul.church",
+        },
       ],
     },
   ];
@@ -87,8 +91,9 @@ export default function Footer() {
       </div>
       <div className="flex w-full flex-col items-center gap-2 md:flex-row md:items-center md:justify-between">
         <div className="mt-[60px] text-white leading-[100%] text-sm">@NSC</div>
-        <div className="mt-[60px] text-white leading-[100%] text-sm">
-          New Seoul Church 010-2380-9189
+        <div className="mt-[60px] text-white leading-[100%] text-sm text-right">
+          <div>A Presbyterian church in Seoul</div>
+          <div className="mt-1">New Seoul Church 010-2380-9189</div>
         </div>
       </div>
     </footer>
