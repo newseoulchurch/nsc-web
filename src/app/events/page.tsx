@@ -82,11 +82,11 @@ export default function EventsPage() {
     getEvents();
   }, []);
   return (
-    <div className="px-4 sm:px-[55px]">
-      <section className="flex flex-col lg:flex-row items-center mt-[77px] py-[31px] gap-6">
+    <div className="px-4 sm:px-[85px]">
+      <section className="flex flex-col lg:flex-row items-center mt-[64px] sm:mt-[104px] py-[31px] gap-6">
         <div className="lg:w-1/2 lg:pr-6 w-full text-center lg:text-left">
-          <div className="text-3xl sm:text-4xl font-bold">EVENTS</div>
-          <div className="mt-4 sm:mt-[28px] text-sm sm:text-base">
+          <div className="text-[28px] sm:text-4xl font-bold uppercase">EVENTS</div>
+          <div className="mt-4 sm:mt-[28px] text-base sm:text-[18px] leading-relaxed">
             Celebrating our life together as a church is such a blessing.
             <br />
             There are many events going on throughout the year.
@@ -108,7 +108,7 @@ export default function EventsPage() {
       <EventCardList eventsData={upcomingEvents} />
 
       <section className="mt-[65px] mb-[27px]">
-        <div className="text-2xl sm:text-h3 font-bold text-center sm:text-left mb-6">
+        <div className="text-2xl sm:text-3xl font-bold text-center sm:text-left mb-6">
           PAST
         </div>
         <EventCardList eventsData={pastEvents} />

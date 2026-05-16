@@ -62,8 +62,12 @@ async function fetchTranscript(videoId: string) {
   return json.content;
 }
 
+// text-embedding-3-large limit is 8191 tokens (~32k chars); truncate to stay safe
+const MAX_EMBEDDING_CHARS = 25000;
+
 // Helper: Get OpenAI embedding
 async function getEmbedding(text: string) {
+  const truncated = text.slice(0, MAX_EMBEDDING_CHARS);
   const res = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
@@ -72,7 +76,7 @@ async function getEmbedding(text: string) {
     },
     body: JSON.stringify({
       model: "text-embedding-3-large",
-      input: text,
+      input: truncated,
       encoding_format: "float",
     }),
   });
@@ -103,7 +107,7 @@ export async function GET(req: Request) {
   let processed = [];
   try {
     const videos = await fetchLatestVideos();
-    for (const { videoId, title, publishedAt } of videos) {
+    for (const { videoId, title, publishedAt } of videos.slice(0, 1)) {
       if (!videoId) continue;
       const exists = await existsInSupabase(videoId);
       if (exists) continue;
@@ -112,6 +116,7 @@ export async function GET(req: Request) {
       if (!transcript) throw new Error("No transcript!");
 
       const embedding = await getEmbedding(transcript);
+      if (!embedding) throw new Error(`Embedding failed for ${videoId}`);
       await insertToSupabase(videoId, title, embedding, publishedAt);
       processed.push({ videoId, title, publishedAt });
     }
