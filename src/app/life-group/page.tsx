@@ -58,15 +58,15 @@ export default function LifeGroupPage() {
     CARD_WIDTH
   );
   return (
-    <div className="px-4 sm:px-[55px]">
-      <section className="flex flex-col lg:flex-row items-center mt-[77px] py-[31px] gap-6">
+    <div className="px-4 sm:px-[85px]">
+      <section className="flex flex-col lg:flex-row items-center mt-[64px] sm:mt-[104px] py-[31px] gap-6">
         <div className="lg:w-1/2 lg:pr-6 w-full text-center lg:text-left">
-          <div className="text-3xl sm:text-4xl font-bold">LIFE GROUP</div>
-          <div className="mt-4 sm:mt-[19px] text-[18px] ">
+          <div className="text-[28px] sm:text-4xl font-bold uppercase">LIFE GROUP</div>
+          <div className="mt-4 sm:mt-[19px] text-base sm:text-[18px] leading-relaxed">
             At NSC, we gather after Sunday Service as a group through which we pray together, learn,
             grow in faith. We as a group aspire to be a witness of God’s presence.
           </div>
-          <div className="mt-4 sm:mt-[28px] text-[18px] ">
+          <div className="mt-4 sm:mt-[28px] text-base sm:text-[18px] leading-relaxed">
             We share our stories, along with fellowship, prayer times, reading scriptures, books.
           </div>
           <Link href="https://tinyurl.com/zw3whc2m" passHref>

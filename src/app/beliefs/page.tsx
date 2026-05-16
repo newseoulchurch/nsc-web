@@ -1,5 +1,6 @@
 import VisionCards from "./VisionCards";
 import { Metadata } from "next"
+import { PageHeader } from "@/components/PageHeader"
 
 export const metadata: Metadata = {
   title: "Our Beliefs",
@@ -9,13 +10,9 @@ export const metadata: Metadata = {
 export default function LifeGroupPage() {
   return (
     <div>
-      <section className="h-[300px] sm:h-[436px] flex justify-center items-center px-4">
-        <h1 className="text-[28px] sm:text-h1 font-bold uppercase text-center">
-          our beliefs
-        </h1>
-      </section>
+      <PageHeader title="our beliefs" />
 
-      <section className="py-[16px] px-4 sm:px-[54px]">
+      <section className="py-[16px] px-4 sm:px-[85px]">
         <div className="w-full h-[200px] sm:h-[261px] bg-[#191b2c] rounded-[12px]">
           <div className="flex flex-col items-center justify-center h-full text-center px-2">
             <h1 className="font-bold uppercase text-white text-[18px] sm:text-[20px]">
@@ -28,7 +25,7 @@ export default function LifeGroupPage() {
         </div>
       </section>
 
-      <section className="py-[16px] px-4 sm:px-[54px] relative">
+      <section className="py-[16px] px-4 sm:px-[85px] relative">
         <img
           className="w-full h-[300px] sm:h-full object-cover rounded-[12px]"
           src="/assets/images/ourbeliefs/Our-belief-image1.png"
@@ -73,7 +70,7 @@ export default function LifeGroupPage() {
       </section>
 
       {/* Confessional Statement */}
-      <section className="py-[16px] px-4 sm:px-[54px] mt-[90px]">
+      <section className="py-[16px] px-4 sm:px-[85px] mt-[90px]">
         <div className="flex flex-col items-center justify-center text-center">
           <h1 className="font-bold uppercase text-[18px] sm:text-[20px] mb-[24px] sm:mb-[38px]">
             CONFESSIONAL STATEMENT

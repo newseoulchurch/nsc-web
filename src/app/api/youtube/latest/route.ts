@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
         id: item.id,
         title: item.title!,
         publishedAt: item.publishedAt,
-        thumbnail: `https://img.youtube.com/vi/${item.id}/hqdefault.jpg`,
+        thumbnail: `https://img.youtube.com/vi/${item.id}/mqdefault.jpg`,
       })) ?? [];
     return NextResponse.json(latestVideos, { status: 200 });
   } catch (error: any) {
