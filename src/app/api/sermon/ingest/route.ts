@@ -62,8 +62,8 @@ async function fetchTranscript(videoId: string) {
   return json.content;
 }
 
-// text-embedding-3-large limit is 8191 tokens (~32k chars); truncate to stay safe
-const MAX_EMBEDDING_CHARS = 25000;
+// text-embedding-3-large hard limit is 8191 tokens; 16k chars ~= 7k tokens in practice
+const MAX_EMBEDDING_CHARS = 16000;
 
 // Helper: Get OpenAI embedding
 async function getEmbedding(text: string) {
