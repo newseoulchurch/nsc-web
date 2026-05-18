@@ -7,7 +7,7 @@ export default function ChurchStaff() {
   const churchStaffMembers = [
     {
       id: 0,
-      name: "Pastor Joe Oh",
+      name: "Joe Oh",
       description: "Vision Casting Pastor",
       image: "/assets/images/about/church-staff/PjoeGif.gif",
     },
