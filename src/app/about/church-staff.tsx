@@ -15,44 +15,56 @@ export default function ChurchStaff() {
       id: 1,
       name: "Elias Kim",
       description: "Admin Pastor",
-      image: "/assets/images/about/church-staff/PElias.gif",
+      image: "/assets/images/about/church-staff/PEliasGif.gif",
     },
     {
       id: 2,
       name: "Margot Chae",
-      description: "Intern JDSN",
+      description: "Space / Kitchen",
       image: "/assets/images/about/church-staff/MargotGif.gif",
     },
     {
       id: 3,
       name: "Isak Choi",
-      description: "Creative GSN",
+      description: "Creative Arts",
       image: "/assets/images/about/church-staff/IsakGif.gif",
     },
 
     {
       id: 4,
       name: "Carmen",
-      description: "Kid's Ministry",
+      description: "Kids' Ministry",
       image: "/assets/images/about/church-staff/CarmenGif.gif",
     },
     {
       id: 5,
       name: "Monica Oh",
-      description: "Follow up",
+      description: "Hospitality",
       image: "/assets/images/about/church-staff/MonicaGif.gif",
     },
     {
       id: 6,
       name: "Eugene Hong",
-      description: "Worship",
+      description: "Media Director / Worship",
       image: "/assets/images/about/church-staff/EugeneGif.gif",
     },
     {
       id: 7,
       name: "Jaedong Na",
-      description: "Worship",
+      description: "Multimedia / Worship",
       image: "/assets/images/about/church-staff/JaedongGif.gif",
+    },
+    {
+      id: 22,
+      name: "Grace Na",
+      description: "Fellowship",
+      image: "/assets/images/about/church-staff/GraceGif.gif",
+    },
+    {
+      id: 23,
+      name: "Nabi Sanni",
+      description: "Welcoming / Followup",
+      image: "/assets/images/about/church-staff/NabiGif.gif",
     },
 
     // {
@@ -73,30 +85,12 @@ export default function ChurchStaff() {
       description: "Publication",
       image: "/assets/images/about/church-staff/HelenGif.gif",
     },
-    {
-      id: 11,
-      name: "Jake Im",
-      description: "Fellowship",
-      image: "/assets/images/about/church-staff/JakeGif.gif",
-    },
     // {
     //   id: 12,
     //   name: "Stella Jung",
     //   description: "Administration",
     //   image: "/assets/images/about/church-staff/StellaGif.gif",
-    // },
-    {
-      id: 13,
-      name: "Thomas Shin",
-      description: "Media",
-      image: "/assets/images/about/church-staff/ThomasGif.gif",
-    },
-    {
-      id: 14,
-      name: "Chance Son",
-      description: "Life Groups",
-      image: "/assets/images/about/church-staff/chanceGif.gif",
-    },
+    // }
     // {
     //   id: 15,
     //   name: "Lara Thompson",
@@ -133,6 +127,12 @@ export default function ChurchStaff() {
       description: "Service",
       image: "/assets/images/about/church-staff/ElainaGif.gif",
     },
+    {
+      id: 21,
+      name: "Chanhee Lee",
+      description: "Website",
+      image: "/assets/images/about/church-staff/ChanheeGif.gif",
+    },
   ];
   return (
     <div className=" mt-[104px] mb-[97px] items-center">
@@ -164,7 +164,7 @@ export default function ChurchStaff() {
               </div>
 
               {/* 9번째 이후에 Divider 추가 */}
-              {index === 7 && (
+              {index === 9 && (
                 <div className="col-span-full justify-center my-10">
                   <div className="text-3xl sm:text-2xl font-bold">
                     Lay staff
