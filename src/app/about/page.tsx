@@ -66,8 +66,8 @@ export default function AboutUsPage() {
               of California, San Diego (UCSD), and seminary at Talbot School of
               Theology, Biola. Ordained in the Presbyterian Church of America
               (PCA), God called P.Joe out to Korea with a call to bring the
-              gospel to Asia. P.Joe loves challenges (Hiking, biking, Basketball,
-              all things active) and commits to lead others to grow closer to
+              gospel to Asia. P.Joe loves (hiking, biking, basketball, and all
+              active things) and commits to lead others to grow closer to
               Jesus and to grow to be more like Him.
             </div>
           </div>
