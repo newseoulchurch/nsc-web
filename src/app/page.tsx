@@ -3,18 +3,78 @@
 import { TEvents } from "@/types/events";
 import { TYoutubeVideo } from "@/types/youtube";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import { EventCardList } from "@/components/EventCardList";
 import { collection, getDocs } from "firebase/firestore";
 import { fireStore } from "@/lib/firebase";
+
+function extractYouTubeVideoId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.hostname.includes("youtu.be")) {
+      return parsed.pathname.replace("/", "") || null;
+    }
+
+    if (parsed.pathname.startsWith("/shorts/")) {
+      return parsed.pathname.split("/shorts/")[1]?.split("/")[0] ?? null;
+    }
+
+    if (parsed.pathname.startsWith("/watch")) {
+      return parsed.searchParams.get("v");
+    }
+
+    if (parsed.pathname.startsWith("/embed/")) {
+      return parsed.pathname.split("/embed/")[1]?.split("/")[0] ?? null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+const YouTubeBackground = memo(function YouTubeBackground({
+  url,
+}: {
+  url: string;
+}) {
+  const videoId = extractYouTubeVideoId(url);
+
+  if (!videoId) return null;
+
+  const embedUrl =
+    `https://www.youtube.com/embed/${videoId}` +
+    `?autoplay=1` +
+    `&mute=1` +
+    `&loop=1` +
+    `&playlist=${videoId}` +
+    `&controls=0` +
+    `&playsinline=1` +
+    `&rel=0` +
+    `&modestbranding=1`;
+
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-black">
+      <iframe
+        src={embedUrl}
+        title="Home background video"
+        className="absolute left-1/2 top-1/2 h-full w-[177.78vh] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+        loading="eager"
+      />
+    </div>
+  );
+});
 
 function decodeHtml(str: string): string {
   const txt = document.createElement("textarea");
   txt.innerHTML = str;
   return txt.value;
 }
-// import "./globals.css";
 
 type HomeVideoConfig = {
   videoUrl: string;
@@ -35,70 +95,14 @@ export default function Home() {
   const [isYoutubeLoading, setIsYoutubeLoading] = useState(true);
   const [isEventLoading, setIsEventLoading] = useState(true);
   const [homeVideo, setHomeVideo] = useState<HomeVideoConfig | null>(null);
-
-  function extractYouTubeVideoId(url: string): string | null {
-    try {
-      const parsed = new URL(url);
-
-      if (parsed.hostname.includes("youtu.be")) {
-        return parsed.pathname.replace("/", "") || null;
-      }
-
-      if (parsed.pathname.startsWith("/shorts/")) {
-        return parsed.pathname.split("/shorts/")[1]?.split("/")[0] ?? null;
-      }
-
-      if (parsed.pathname.startsWith("/watch")) {
-        return parsed.searchParams.get("v");
-      }
-
-      if (parsed.pathname.startsWith("/embed/")) {
-        return parsed.pathname.split("/embed/")[1]?.split("/")[0] ?? null;
-      }
-
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  function YouTubeBackground({ url }: { url: string }) {
-    const videoId = extractYouTubeVideoId(url);
-
-    if (!videoId) return null;
-
-    const embedUrl =
-      `https://www.youtube.com/embed/${videoId}` +
-      `?autoplay=1` +
-      `&mute=1` +
-      `&loop=1` +
-      `&playlist=${videoId}` +
-      `&controls=0` +
-      `&playsinline=1` +
-      `&rel=0` +
-      `&modestbranding=1`;
-
-    return (
-      <div className="absolute inset-0 overflow-hidden bg-black">
-        <div className="absolute left-1/2 top-1/2 h-full w-[177.78vh] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2">
-          <iframe
-            src={embedUrl}
-            title="Home background video"
-            className="h-full w-full pointer-events-none"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
-      </div>
-    );
-  }
+  const [showYoutubeLayer, setShowYoutubeLayer] = useState(false);
 
   const line1 = homeVideo?.titleLine1 ?? "";
   const line2 = homeVideo?.titleLine2 ?? "";
 
   const defaultWatchUrl = "https://www.youtube.com/@newseoulchurch";
   const watchUrl = homeVideo?.watchUrl?.trim() || defaultWatchUrl;
+  const hasValidVideo = isValidYouTubeUrl(homeVideo?.videoUrl);
 
   const handleSearch = async (e: KeyboardEvent | null, keyword?: string) => {
     const searchTerm = keyword ?? query;
@@ -216,48 +220,55 @@ export default function Home() {
         <UpdateBlocker />
       ) : ( */}
       <main>
-        {/* Hero Section */}
         {/* 🔹 Background Video */}
-
         <section className="relative flex flex-col items-center justify-center h-[820px] p-10 text-center overflow-hidden">
-          {isValidYouTubeUrl(homeVideo?.videoUrl) ? (
-            <YouTubeBackground url={homeVideo!.videoUrl} />
-          ) : (
-            <img
-              src="/assets/images/nscBackgroundImage.jpeg"
-              alt="bg image"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+          {hasValidVideo && homeVideo?.videoUrl && (
+            <YouTubeBackground url={homeVideo.videoUrl} />
           )}
+
+          <div
+            className={`absolute inset-0 z-[4] bg-black transition-opacity duration-1000 pointer-events-none ${
+              showYoutubeLayer ? "opacity-0" : "opacity-80"
+            }`}
+          />
+
+          <video
+            autoPlay
+            muted
+            playsInline
+            onEnded={() => setShowYoutubeLayer(true)}
+            className={`absolute inset-0 z-[5] w-full h-full object-cover transition-opacity duration-1000 ${
+              showYoutubeLayer ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            <source src="/assets/videos/NSC_FINAL_INTRO.mp4" type="video/mp4" />
+          </video>
+
           <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
-          {/* 🔹 Content Overlay */}
-          {homeVideo?.videoUrl && (
-            <div className="relative z-10 text-white">
+          {showYoutubeLayer && (
+            <div className="relative z-20 text-white">
               <h1 className="text-h1 font-bold">
                 {line1}
                 <br />
                 {line2}
               </h1>
-              {/* <p className="mt-[22px] text-[18px] leading-[100%]">
-                THE BLIND SPOTS IN OUR LIVES THAT
-                <br /> STOP US FROM REFLECTING GOD’S GLORY
-              </p> */}
 
-              <a
-                href={watchUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Watch latest sermon"
-              >
-                <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
-                  WORD IS LIFE{" "}
-                </button>
-              </a>
+              {watchUrl && (
+                <a
+                  href={watchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Watch latest sermon"
+                >
+                  <button className="py-2 px-[14px] mt-[55px] border border-white border-[1.5px] rounded-[8px] text-button tracking-[0.1rem] cursor-pointer hover:bg-black hover:text-white transition-colors duration-200">
+                    WORD IS LIFE
+                  </button>
+                </a>
+              )}
             </div>
           )}
         </section>
-
         <section className="mt-[68px] mb-[61px] px-4 lg:px-[54px]">
           {/* Sunday Service */}
           <div
