@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   const results = (data || []).slice(0, 3).map((row: Row) => ({
     videoId: row.id,
     title: row.title,
-    thumbnail: `https://img.youtube.com/vi/${row.id}/hqdefault.jpg`,
+    thumbnail: `https://img.youtube.com/vi/${row.id}/mqdefault.jpg`,
     similarity: row.similarity,
   }));
   if (results.length === 0) {

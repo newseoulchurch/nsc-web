@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { TYoutubeVideo } from "@/types/youtube";
 import React, { useEffect, useState } from "react";
 
+function decodeHtml(str: string): string {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
+
 export default function SermonSeriesPage() {
   const previousSermons = [
     {
@@ -74,16 +80,16 @@ export default function SermonSeriesPage() {
   return (
     <div className="bg-black text-white flex flex-col">
       <section
-        className="flex flex-col items-center sm:items-start justify-center mb-10 gap-4 px-6 sm:px-14 h-[351px] text-center sm:text-start"
+        className="flex flex-col items-center sm:items-start justify-center mb-10 gap-4 px-4 sm:px-[85px] h-[351px] text-center sm:text-start"
         style={{
           backgroundImage:
             "url('/assets/images/sermon/sermon-background-img.png')",
         }}
       >
-        <h1 className="text-3xl sm:text-4xl font-bold uppercase">
+        <h1 className="text-[28px] sm:text-4xl font-bold uppercase">
           Sermon Series
         </h1>
-        <div className="text-base max-w-2xl">
+        <div className="text-base sm:text-[18px] leading-relaxed max-w-2xl">
           Our Sermon Series offers a collection of thought-provoking teachings
           designed to deepen your faith and understanding in gospel.
         </div>
@@ -101,7 +107,7 @@ export default function SermonSeriesPage() {
         </Button>
       </section>
 
-      <section className="px-14 py-14">
+      <section className="px-4 sm:px-[85px] py-14">
         <div className="flex justify-center items-center">
           <h3 className="text-h3 font-bold">LATEST MESSAGE</h3>
         </div>
@@ -126,7 +132,7 @@ export default function SermonSeriesPage() {
                     height={"219px"}
                   />
                   <p className="mt-[10px] text-base font-medium">
-                    {data.title}
+                    {decodeHtml(data.title)}
                   </p>
                 </a>
               </article>
@@ -167,7 +173,7 @@ export default function SermonSeriesPage() {
           </div>
         )}
       </section> */}
-      <section className="flex flex-col items-center justify-center my-10 px-4 sm:px-14">
+      <section className="flex flex-col items-center justify-center my-10 px-4 sm:px-[85px]">
         <h1 className="text-xl sm:text-2xl font-bold uppercase text-center">
           Previous Sermons
         </h1>

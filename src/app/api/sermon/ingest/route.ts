@@ -14,24 +14,25 @@ const youtube = google.youtube({
   auth: YOUTUBE_API_KEY,
 });
 
-// Helper: Fetch latest 3 long videos with "Pastor Sermon" in title
+// Helper: Fetch latest sermon videos
+// Sermon titles follow the pattern: "[Series] Title | Pastor [Name] | New Seoul Church (NSC)"
+// Worship videos follow: "Sunday Service Worship | [Date]" — excluded by title filter
 async function fetchLatestVideos() {
   const params: youtube_v3.Params$Resource$Search$List = {
     part: ["snippet"],
     channelId: CHANNEL_ID,
-    q: "Pastor Sermon",
+    q: "New Seoul Church NSC",
     type: ["video"],
-    videoDuration: "long",
     order: "date",
-    maxResults: 5,
+    maxResults: 10,
   };
   const res = await youtube.search.list(params);
   return (
     res.data.items
-      ?.filter(
-        (item) =>
-          item.snippet?.description?.includes("Sermon")
-      )
+      ?.filter((item) => {
+        const title = item.snippet?.title ?? "";
+        return title.includes("| Pastor") && title.includes("New Seoul Church");
+      })
       .map((item) => ({
         videoId: item.id?.videoId,
         title: item.snippet?.title || "",
@@ -61,8 +62,12 @@ async function fetchTranscript(videoId: string) {
   return json.content;
 }
 
+// text-embedding-3-large hard limit is 8191 tokens; 16k chars ~= 7k tokens in practice
+const MAX_EMBEDDING_CHARS = 16000;
+
 // Helper: Get OpenAI embedding
 async function getEmbedding(text: string) {
+  const truncated = text.slice(0, MAX_EMBEDDING_CHARS);
   const res = await fetch("https://api.openai.com/v1/embeddings", {
     method: "POST",
     headers: {
@@ -71,7 +76,7 @@ async function getEmbedding(text: string) {
     },
     body: JSON.stringify({
       model: "text-embedding-3-large",
-      input: text,
+      input: truncated,
       encoding_format: "float",
     }),
   });
@@ -102,7 +107,7 @@ export async function GET(req: Request) {
   let processed = [];
   try {
     const videos = await fetchLatestVideos();
-    for (const { videoId, title, publishedAt } of videos) {
+    for (const { videoId, title, publishedAt } of videos.slice(0, 1)) {
       if (!videoId) continue;
       const exists = await existsInSupabase(videoId);
       if (exists) continue;
@@ -111,6 +116,7 @@ export async function GET(req: Request) {
       if (!transcript) throw new Error("No transcript!");
 
       const embedding = await getEmbedding(transcript);
+      if (!embedding) throw new Error(`Embedding failed for ${videoId}`);
       await insertToSupabase(videoId, title, embedding, publishedAt);
       processed.push({ videoId, title, publishedAt });
     }

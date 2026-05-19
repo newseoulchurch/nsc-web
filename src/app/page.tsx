@@ -8,6 +8,12 @@ import Image from "next/image";
 import { EventCardList } from "@/components/EventCardList";
 import { collection, getDocs } from "firebase/firestore";
 import { fireStore } from "@/lib/firebase";
+
+function decodeHtml(str: string): string {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
 // import "./globals.css";
 
 type HomeVideoConfig = {
@@ -407,7 +413,7 @@ export default function Home() {
                           className="w-full h-[135px] rounded-md object-cover"
                         />
                         <p className="mt-2 text-sm font-medium text-gray-800 line-clamp-2">
-                          {data.title}
+                          {decodeHtml(data.title)}
                         </p>
                       </a>
                     </article>
@@ -467,7 +473,7 @@ export default function Home() {
                       height={"219px"}
                     />
                     <p className="mt-[10px] text-base font-medium">
-                      {data.title}
+                      {decodeHtml(data.title)}
                     </p>
                   </a>
                 </article>
@@ -526,7 +532,7 @@ export default function Home() {
                         />
                       </div>
                       <p className="mt-[10px] text-base font-medium">
-                        {data.title}
+                        {decodeHtml(data.title)}
                       </p>
                     </a>
                   </article>

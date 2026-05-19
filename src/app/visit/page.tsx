@@ -17,10 +17,10 @@ export default function VisitPage() {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex flex-col gap-8 px-4 sm:px-14 py-6 w-full max-w-[1024px]">
-        <div className="text-left text-2xl font-bold uppercase">Visit Us</div>
+      <div className="flex flex-col gap-8 px-4 sm:px-[85px] pt-[64px] sm:pt-[104px] pb-6 w-full max-w-[1024px]">
+        <div className="text-left text-[28px] sm:text-4xl font-bold uppercase">Visit Us</div>
 
-        <p className="text-left text-base sm:text-lg leading-relaxed">
+        <p className="text-left text-base sm:text-[18px] leading-relaxed">
           Whether you are new to faith or seeking a church home, we invite you
           to join us and be part of a Christ-centered community committed to
           spiritual growth and service.
@@ -46,12 +46,12 @@ export default function VisitPage() {
         />
       </div>
 
-      <div className="w-full max-w-[1024px] px-4 sm:px-14">
+      <div className="w-full max-w-[1024px] px-4 sm:px-[85px]">
         <OurServices />
       </div>
 
-      <div className="flex flex-col gap-9 px-4 sm:px-14 py-6 w-full max-w-[1024px]">
-        <div className="text-left text-2xl font-bold uppercase">Location</div>
+      <div className="flex flex-col gap-9 px-4 sm:px-[85px] py-6 w-full max-w-[1024px]">
+        <div className="text-left text-2xl sm:text-3xl font-bold uppercase">Location</div>
 
         <div className="w-full h-[375px] rounded-lg overflow-hidden">
           <iframe

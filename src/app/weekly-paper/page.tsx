@@ -18,7 +18,7 @@ export default function WeeklyPage() {
 
   return (
     <>
-      <section className="py-[16px] px-4 sm:px-[54px]">
+      <section className="py-[16px] px-4 sm:px-[85px] mt-[64px] sm:mt-[104px]">
         <div className="w-full  rounded-[12px] overflow-hidden">
           <div className="flex flex-col items-center justify-center text-center gap-6 py-6">
             {isLoading ? (
