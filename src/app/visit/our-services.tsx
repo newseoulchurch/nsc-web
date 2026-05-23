@@ -33,7 +33,7 @@ export default function OurServices() {
               },
               {
                 title: "Early morning worship",
-                time: "Saturday at 7:00 AM",
+                time: "Saturday at 8:00 AM",
                 location: "Vision Hall, 4th floor",
               },
             ].map((service, idx) => (

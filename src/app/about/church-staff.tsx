@@ -112,7 +112,7 @@ export default function ChurchStaff() {
     {
       id: 18,
       name: "Enzo Choi",
-      description: "Sports Ministry",
+      description: "Communications",
       image: "/assets/images/about/church-staff/EnzoGif.gif",
     },
     // {
