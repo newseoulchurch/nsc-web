@@ -29,6 +29,7 @@ export default function Header() {
     { href: "/events", label: "EVENTS" },
     { href: "/life-group", label: "LIFE GROUP" },
     { href: "/sermon", label: "SERMON SERIES" },
+    { href: "/radical-obedience", label: "RADICAL OBEDIENCE" },
   ];
   const adminNavLinks = [
     { href: "/admin/events", label: "이벤트 관리" },
