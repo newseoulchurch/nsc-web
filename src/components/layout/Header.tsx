@@ -27,6 +27,7 @@ export default function Header() {
     { href: "/beliefs", label: "OUR BELIEFS" },
     { href: "/about", label: "ABOUT US" },
     { href: "/bulletin", label: "BULLETIN" },
+    { href: "/wall-of-faith", label: "WALL OF FAITH" },
     { href: "/events", label: "EVENTS" },
     { href: "/life-group", label: "LIFE GROUP" },
     { href: "/sermon", label: "SERMON SERIES" },
@@ -36,6 +37,7 @@ export default function Header() {
     { href: "/admin/weekly-paper", label: "주보 관리" },
     { href: "/admin/home-video", label: "홈 화면 영상 설정" },
     { href: "/admin/bulletin", label: "게시판 관리" },
+    { href: "/admin/wall-of-faith", label: "Wall of Faith 관리" },
   ];
 
   useEffect(() => {
