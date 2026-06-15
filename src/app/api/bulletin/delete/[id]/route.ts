@@ -20,6 +20,10 @@ export async function DELETE(
   }
 
   const { id } = await params
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!UUID_RE.test(id)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+  }
   const db = supabase()
 
   const { data, error } = await db
@@ -31,7 +35,7 @@ export async function DELETE(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  await del(data.image_url)
+  if (data?.image_url) await del(data.image_url)
 
   return NextResponse.json({ ok: true })
 }
