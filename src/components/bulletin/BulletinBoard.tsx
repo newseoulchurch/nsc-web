@@ -205,7 +205,7 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
                   aspectRatio: "3/4",
                   cursor: "pointer",
                 }}
-                onClick={() => setLightboxUrl(item.image_url)}
+                onClick={mode === "view" ? () => setLightboxUrl(item.image_url) : undefined}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
