@@ -118,12 +118,16 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
 
   async function handleSave() {
     setSaving(true)
-    await fetch("/api/bulletin/layout", {
+    const res = await fetch("/api/bulletin/layout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(items),
     })
     setSaving(false)
+    if (!res.ok) {
+      const { error } = await res.json().catch(() => ({ error: "Save failed" }))
+      alert(error ?? "Save failed")
+    }
   }
 
   return (
