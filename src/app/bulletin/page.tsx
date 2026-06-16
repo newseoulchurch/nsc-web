@@ -13,12 +13,14 @@ export default async function BulletinPage() {
   const items = await getItems()
 
   return (
-    <div className="w-full">
-      <div className="px-4 sm:px-[85px] py-8">
-        <h1 className="text-2xl font-bold tracking-widest uppercase mb-1">Announcements</h1>
-        <p className="text-sm text-gray-500 mb-6">Click any poster to view full size</p>
+    <div className="w-full pb-20">
+      <div className="px-4 sm:px-8 pt-8 pb-5">
+        <h1 className="text-2xl font-semibold tracking-widest uppercase mb-3">Announcements</h1>
+        <p className="text-xs text-gray-400 tracking-widest uppercase">Current announcements</p>
       </div>
-      <BulletinBoard initialItems={items} mode="view" />
+      <div className="px-4 sm:px-8">
+        <BulletinBoard initialItems={items} mode="view" />
+      </div>
     </div>
   )
 }

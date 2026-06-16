@@ -15,7 +15,7 @@ type Props = {
 }
 
 type DragState = {
-  type: "drag" | "resize"
+  type: "drag" | "resize" | "resize-h" | "resize-v" | "rotate"
   itemId: string
   startPointerX: number
   startPointerY: number
@@ -23,6 +23,10 @@ type DragState = {
   startItemY: number
   startItemW: number
   startItemH: number
+  aspectRatio?: number
+  centerViewportX?: number
+  centerViewportY?: number
+  startRotation?: number
 }
 
 export default function BulletinBoard({ initialItems, mode }: Props) {
@@ -30,6 +34,7 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [lightboxOrigin, setLightboxOrigin] = useState<{ x: number; y: number; width: number; height: number } | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<DragState | null>(null)
 
@@ -63,13 +68,27 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
         if (item.id !== drag.itemId) return item
         if (drag.type === "drag") {
           return { ...item, x: Math.round(drag.startItemX + dx), y: Math.round(drag.startItemY + dy) }
-        } else {
-          return {
-            ...item,
-            width: Math.max(80, Math.round(drag.startItemW + dx)),
-            height: Math.max(80, Math.round(drag.startItemH + dy)),
-          }
         }
+        if (drag.type === "resize") {
+          const newW = Math.max(80, Math.round(drag.startItemW + dx))
+          const newH = Math.max(80, Math.round(newW / drag.aspectRatio!))
+          return { ...item, width: newW, height: newH }
+        }
+        if (drag.type === "resize-h") {
+          return { ...item, width: Math.max(80, Math.round(drag.startItemW + dx)) }
+        }
+        if (drag.type === "resize-v") {
+          return { ...item, height: Math.max(80, Math.round(drag.startItemH + dy)) }
+        }
+        if (drag.type === "rotate") {
+          const cx = drag.centerViewportX!
+          const cy = drag.centerViewportY!
+          const startAngle = Math.atan2(drag.startPointerY - cy, drag.startPointerX - cx)
+          const currentAngle = Math.atan2(e.clientY - cy, e.clientX - cx)
+          const delta = (currentAngle - startAngle) * (180 / Math.PI)
+          return { ...item, rotation: Math.round(drag.startRotation! + delta) }
+        }
+        return item
       })
     )
   }, [])
@@ -80,8 +99,11 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
     window.removeEventListener("pointerup", handlePointerUp)
   }, [handlePointerMove])
 
-  function startDrag(e: React.PointerEvent, item: Item, type: "drag" | "resize") {
+  function startDrag(e: React.PointerEvent, item: Item, type: DragState["type"]) {
     e.preventDefault()
+    const container = containerRef.current
+    const currentScale = container ? container.clientWidth / CANVAS_W : 1
+    const canvasRect = container?.getBoundingClientRect()
     dragRef.current = {
       type,
       itemId: item.id,
@@ -91,6 +113,12 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
       startItemY: item.y,
       startItemW: item.width,
       startItemH: item.height,
+      ...(type === "resize" && { aspectRatio: item.width / item.height }),
+      ...(type === "rotate" && canvasRect && {
+        centerViewportX: canvasRect.left + (item.x + item.width / 2) * currentScale,
+        centerViewportY: canvasRect.top + (item.y + item.height / 2) * currentScale,
+        startRotation: item.rotation,
+      }),
     }
     window.addEventListener("pointermove", handlePointerMove)
     window.addEventListener("pointerup", handlePointerUp)
@@ -141,8 +169,28 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
         />
       )}
 
-      {/* Desktop: scaled canvas */}
-      <div ref={containerRef} className="hidden md:block w-full" style={{ height: CANVAS_H * scale }}>
+      {/* Desktop: framed canvas */}
+      <div
+        className="hidden md:block"
+        style={{
+          padding: 16,
+          background: `
+  repeating-linear-gradient(
+    89deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+  ),
+  repeating-linear-gradient(
+    91deg,
+    transparent 0px, transparent 7px,
+    rgba(255,255,255,0.03) 7px, rgba(255,255,255,0.03) 8px
+  ),
+  linear-gradient(160deg, #6b4423 0%, #4a2f15 50%, #3a2310 100%)
+`.replace(/\s+/g, " ").trim(),
+          boxShadow: "0 20px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.04)",
+        }}
+      >
+      <div ref={containerRef} className="w-full" style={{ height: CANVAS_H * scale }}>
         <div
           style={{
             width: CANVAS_W,
@@ -150,24 +198,12 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
             transformOrigin: "top left",
             transform: `scale(${scale})`,
             position: "relative",
-            background: "#c4a06a",
-            backgroundImage:
-              "repeating-linear-gradient(45deg, #8b6914 0, #8b6914 1px, transparent 0, transparent 50%)",
-            backgroundSize: "6px 6px",
+            background: "#181818",
+            backgroundImage: "radial-gradient(circle, #252525 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
           }}
           onClick={handleCanvasClick}
         >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0.22,
-              backgroundImage:
-                "repeating-linear-gradient(45deg, #8b6914 0, #8b6914 1px, transparent 0, transparent 50%)",
-              backgroundSize: "6px 6px",
-              pointerEvents: "none",
-            }}
-          />
           {items.map((item) => (
             <BulletinItemComp
               key={item.id}
@@ -178,20 +214,43 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
               onDelete={() => handleDelete(item.id)}
               onDragStart={(e) => startDrag(e, item, "drag")}
               onResizeStart={(e) => startDrag(e, item, "resize")}
-              onViewClick={() => setLightboxUrl(item.image_url)}
+              onResizeHStart={(e) => startDrag(e, item, "resize-h")}
+              onResizeVStart={(e) => startDrag(e, item, "resize-v")}
+              onRotateStart={(e) => startDrag(e, item, "rotate")}
+              onViewClick={(rect) => { setLightboxUrl(item.image_url); setLightboxOrigin(rect) }}
             />
           ))}
         </div>
       </div>
+      </div>
 
-      {/* Mobile: 2-column grid */}
+      {/* Mobile: framed grid */}
       <div
-        className="md:hidden w-full p-4"
+        className="md:hidden"
         style={{
-          background: "#c4a06a",
-          backgroundImage:
-            "repeating-linear-gradient(45deg, #8b6914 0, #8b6914 1px, transparent 0, transparent 50%)",
-          backgroundSize: "6px 6px",
+          padding: 8,
+          background: `
+  repeating-linear-gradient(
+    89deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+  ),
+  repeating-linear-gradient(
+    91deg,
+    transparent 0px, transparent 7px,
+    rgba(255,255,255,0.03) 7px, rgba(255,255,255,0.03) 8px
+  ),
+  linear-gradient(160deg, #6b4423 0%, #4a2f15 50%, #3a2310 100%)
+`.replace(/\s+/g, " ").trim(),
+          boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+        }}
+      >
+      <div
+        className="w-full p-4"
+        style={{
+          background: "#181818",
+          backgroundImage: "radial-gradient(circle, #252525 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
           minHeight: 300,
         }}
       >
@@ -215,15 +274,20 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
                 <img
                   src={item.image_url}
                   alt="Announcement"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  style={{ width: "100%", height: "100%", objectFit: "fill", display: "block" }}
                 />
               </div>
             ))}
         </div>
       </div>
+      </div>
 
       {lightboxUrl && (
-        <BulletinLightbox imageUrl={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+        <BulletinLightbox
+          imageUrl={lightboxUrl}
+          originRect={lightboxOrigin}
+          onClose={() => { setLightboxUrl(null); setLightboxOrigin(null) }}
+        />
       )}
     </div>
   )
