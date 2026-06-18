@@ -2,7 +2,9 @@ import BulletinBoard from "@/components/bulletin/BulletinBoard"
 import type { BulletinItem } from "@/types/bulletin"
 
 async function getItems(): Promise<BulletinItem[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/bulletin/layout`, {
+  const base = process.env.NEXT_PUBLIC_SITE_URL
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  const res = await fetch(`${base}/api/bulletin/layout`, {
     cache: "no-store",
   })
   if (!res.ok) return []
