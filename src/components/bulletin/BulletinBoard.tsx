@@ -134,7 +134,20 @@ export default function BulletinBoard({ initialItems, mode }: Props) {
       return
     }
     const newItem: Item = await res.json()
-    setItems((prev) => [...prev, newItem])
+
+    const url = URL.createObjectURL(file)
+    const img = new window.Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const MAX_W = 260, MAX_H = 340
+      const ratio = img.naturalWidth / img.naturalHeight
+      let w = MAX_W
+      let h = Math.round(w / ratio)
+      if (h > MAX_H) { h = MAX_H; w = Math.round(h * ratio) }
+      setItems((prev) => [...prev, { ...newItem, width: w, height: h }])
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); setItems((prev) => [...prev, newItem]) }
+    img.src = url
   }
 
   async function handleDelete(id: string) {
