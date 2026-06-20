@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import BulletinBoard from "@/components/bulletin/BulletinBoard"
+
+export const dynamic = "force-dynamic"
 import type { BulletinItem } from "@/types/bulletin"
 
 async function getItems(): Promise<BulletinItem[]> {
