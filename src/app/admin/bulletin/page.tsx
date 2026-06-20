@@ -1,17 +1,20 @@
+import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import BulletinBoard from "@/components/bulletin/BulletinBoard"
 import type { BulletinItem } from "@/types/bulletin"
 
 async function getItems(): Promise<BulletinItem[]> {
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000")
-  const res = await fetch(`${base}/api/bulletin/layout`, {
-    cache: "no-store",
-  })
-  if (!res.ok) return []
-  return res.json()
+  const { data, error } = await createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+    .from("bulletin_items")
+    .select("*")
+    .order("created_at", { ascending: true })
+
+  if (error) return []
+  return data
 }
 
 export default async function AdminBulletinPage() {
