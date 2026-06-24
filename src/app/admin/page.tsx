@@ -23,6 +23,9 @@ export default async function AdminPage() {
         <a href="/admin/home-video" className="underline text-blue-500">
           홈 화면 영상 설정
         </a>
+        <a href="/admin/bulletin" className="underline text-blue-500">
+          게시판 관리
+        </a>
       </div>
     </div>
   );
