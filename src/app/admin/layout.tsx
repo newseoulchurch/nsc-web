@@ -8,7 +8,7 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  const cookieStore = cookies(); // await 필요 없음
+  const cookieStore = await cookies();
   const token = cookieStore.get("adminToken")?.value;
   console.log("//token", token);
   if (!token) {
