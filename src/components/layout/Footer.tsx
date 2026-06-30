@@ -94,7 +94,7 @@ export default function Footer() {
           <div className="text-white font-bold mb-2">OFFERING</div>
           <div className="flex flex-col gap-1 text-sm text-white">
             <span>Sunday Offering — 국민 782701-04-139438 (뉴서울교회)</span>
-            <span>Next Gen Support — 우리 1002863857531 (뉴서울교회)</span>
+            <span>Next Gen Support — 우리 1005004463794 (뉴서울교회)</span>
           </div>
         </div>
       </div>
