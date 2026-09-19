@@ -19,6 +19,7 @@ export function noteTextStyle(item: BulletinTextItem): React.CSSProperties {
     fontSize: item.font_size,
     lineHeight: 1.25,
     color: item.text_color,
+    textAlign: item.text_align,
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
   }

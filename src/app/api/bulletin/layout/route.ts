@@ -50,7 +50,7 @@ function toRow(item: BulletinItem) {
     created_at: item.created_at,
   }
   if (item.type === "image") {
-    return { ...base, image_url: item.image_url, content: null, font: null, font_size: null, text_color: null, note_color: null }
+    return { ...base, image_url: item.image_url, content: null, font: null, font_size: null, text_color: null, note_color: null, text_align: null }
   }
   return {
     ...base,
@@ -60,6 +60,7 @@ function toRow(item: BulletinItem) {
     font_size: item.font_size,
     text_color: item.text_color,
     note_color: item.note_color,
+    text_align: item.text_align,
   }
 }
 
@@ -112,25 +113,24 @@ export async function POST(request: Request) {
 
   const db = supabase()
 
-  // Note: the settings upsert runs before the delete-and-reinsert of items so that,
-  // if something fails partway through, it's the board height (not the items) that
-  // is left half-saved — the safer thing to have half-saved.
-  // Acceptable trade-off for this feature's scale.
+  // Write order is chosen so a failure never empties the board: settings first, then
+  // upsert every submitted item, and only then prune rows that were not submitted.
   const { error: settingsError } = await db
     .from("bulletin_settings")
     .upsert({ id: 1, board_height })
   if (settingsError) return NextResponse.json({ error: settingsError.message }, { status: 500 })
 
-  const { error: deleteError } = await db
-    .from("bulletin_items")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000")
-  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 })
-
   if (items.length > 0) {
-    const { error: insertError } = await db.from("bulletin_items").insert(items.map(toRow))
-    if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 })
+    const { error: upsertError } = await db.from("bulletin_items").upsert(items.map(toRow))
+    if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })
   }
+
+  const keptIds = items.map((item) => item.id)
+  const pruneQuery = db.from("bulletin_items").delete()
+  const { error: pruneError } = await (keptIds.length > 0
+    ? pruneQuery.not("id", "in", `(${keptIds.join(",")})`)
+    : pruneQuery.neq("id", "00000000-0000-0000-0000-000000000000"))
+  if (pruneError) return NextResponse.json({ error: pruneError.message }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }

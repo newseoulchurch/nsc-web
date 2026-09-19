@@ -1,4 +1,6 @@
-export type NoteFont = "circular" | "serif" | "hand" | "mono"
+export type NoteFont = "circular" | "serif" | "hand" | "mono" | "bebas" | "playfair" | "gaegu" | "blackhan"
+
+export type NoteAlign = "left" | "center" | "right"
 
 export type Mode = "view" | "edit"
 
@@ -25,14 +27,21 @@ export type BulletinTextItem = BulletinItemBase & {
   font_size: number
   text_color: string
   note_color: string
+  text_align: NoteAlign
 }
 
 export type BulletinItem = BulletinImageItem | BulletinTextItem
 
-const NOTE_FONT_VALUES: readonly NoteFont[] = ["circular", "serif", "hand", "mono"]
+const NOTE_FONT_VALUES: readonly NoteFont[] = ["circular", "serif", "hand", "mono", "bebas", "playfair", "gaegu", "blackhan"]
+
+const NOTE_ALIGN_VALUES: readonly NoteAlign[] = ["left", "center", "right"]
 
 export function isNoteFont(value: unknown): value is NoteFont {
   return typeof value === "string" && (NOTE_FONT_VALUES as readonly string[]).includes(value)
+}
+
+export function isNoteAlign(value: unknown): value is NoteAlign {
+  return typeof value === "string" && (NOTE_ALIGN_VALUES as readonly string[]).includes(value)
 }
 
 function isFiniteNumber(value: unknown): value is number {
@@ -67,12 +76,13 @@ export function parseBulletinItem(row: Record<string, unknown>): BulletinItem | 
   }
 
   if (type === "text") {
-    const { content, font, font_size, text_color, note_color } = row
+    const { content, font, font_size, text_color, note_color, text_align } = row
     if (typeof content !== "string") return null
     if (!isNoteFont(font)) return null
     if (!isFiniteNumber(font_size)) return null
     if (typeof text_color !== "string" || typeof note_color !== "string") return null
-    return { ...base, type: "text", content, font, font_size, text_color, note_color }
+    const align: NoteAlign = isNoteAlign(text_align) ? text_align : "left"
+    return { ...base, type: "text", content, font, font_size, text_color, note_color, text_align: align }
   }
 
   return null
