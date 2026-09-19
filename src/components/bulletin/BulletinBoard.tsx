@@ -1,21 +1,21 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import type { BulletinImageItem, BulletinItem as Item, BulletinTextItem } from "@/types/bulletin"
+import type { BulletinImageItem, BulletinItem as Item, BulletinTextItem, Mode } from "@/types/bulletin"
 import BulletinItemFrame from "./BulletinItemFrame"
 import BulletinImage from "./BulletinImage"
-import BulletinNote, { noteTextStyle } from "./BulletinNote"
+import BulletinNote from "./BulletinNote"
+import BulletinMobileList from "./BulletinMobileList"
 import BulletinLightbox from "./BulletinLightbox"
 import BulletinToolbar from "./BulletinToolbar"
 import BulletinFormatBar from "./BulletinFormatBar"
-import { orderForMobile } from "./mobileOrder"
 import { handFont } from "./handFont"
 import { BOARD_HEIGHT, CANVAS_W, NOTE_DEFAULTS, NOTE_LIMIT } from "./noteOptions"
 
 type Props = {
   initialItems: Item[]
   initialBoardHeight: number
-  mode: "view" | "edit"
+  mode: Mode
 }
 
 type DragState = {
@@ -55,7 +55,7 @@ const corkboardStyle: React.CSSProperties = {
   backgroundSize: "20px 20px",
 }
 
-function isVisible(item: Item, mode: "view" | "edit"): boolean {
+function isVisible(item: Item, mode: Mode): boolean {
   if (mode === "edit") return true
   return item.type === "image" || item.content.trim().length > 0
 }
@@ -384,43 +384,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
         }}
       >
         <div className="w-full p-4 flex flex-col gap-4" style={{ ...corkboardStyle, minHeight: 300 }}>
-          {orderForMobile(visibleItems).map((block) =>
-            block.kind === "note" ? (
-              <div
-                key={block.item.id}
-                style={{
-                  ...noteTextStyle(block.item),
-                  fontSize: Math.max(14, Math.round(block.item.font_size * 0.7)),
-                  background: block.item.note_color,
-                  padding: 12,
-                  borderRadius: 2,
-                  boxShadow: "4px 6px 16px rgba(0,0,0,0.45)",
-                  transform: `rotate(${Math.max(-4, Math.min(4, block.item.rotation))}deg)`,
-                }}
-              >
-                {block.item.content}
-              </div>
-            ) : (
-              <div key={block.items[0].id} className="grid grid-cols-2 gap-4">
-                {block.items.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      transform: `rotate(${item.rotation}deg)`,
-                      boxShadow: "4px 6px 16px rgba(0,0,0,0.45)",
-                      borderRadius: 2,
-                      overflow: "hidden",
-                      aspectRatio: "3/4",
-                      cursor: "pointer",
-                    }}
-                    onClick={mode === "view" ? () => setLightboxUrl(item.image_url) : undefined}
-                  >
-                    <BulletinImage item={item} />
-                  </div>
-                ))}
-              </div>
-            )
-          )}
+          <BulletinMobileList items={visibleItems} mode={mode} onOpenImage={setLightboxUrl} />
         </div>
       </div>
 

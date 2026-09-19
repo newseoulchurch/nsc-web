@@ -1,5 +1,7 @@
 export type NoteFont = "circular" | "serif" | "hand" | "mono"
 
+export type Mode = "view" | "edit"
+
 export type BulletinItemBase = {
   id: string
   x: number

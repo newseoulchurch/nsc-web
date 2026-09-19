@@ -1,10 +1,10 @@
 "use client"
 
-import type { BulletinItem } from "@/types/bulletin"
+import type { BulletinItem, Mode } from "@/types/bulletin"
 
 type Props = {
   item: BulletinItem
-  mode: "view" | "edit"
+  mode: Mode
   selected?: boolean
   lockAspect: boolean
   onSelect?: () => void
