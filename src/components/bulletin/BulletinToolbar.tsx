@@ -42,6 +42,12 @@ export default function BulletinToolbar({
       return
     }
     onBoardHeight(parsed)
+    setHeightDraft(String(boardHeight))
+  }
+
+  function stepHeight(delta: number) {
+    const base = Number.parseInt(heightDraft, 10)
+    onBoardHeight((Number.isNaN(base) ? boardHeight : base) + delta)
   }
 
   return (
@@ -60,7 +66,7 @@ export default function BulletinToolbar({
           aria-label="Decrease board height"
           className="w-6 h-6 rounded bg-gray-800 text-gray-200 text-sm leading-none disabled:opacity-40"
           disabled={boardHeight <= BOARD_HEIGHT.min}
-          onClick={() => onBoardHeight(boardHeight - BOARD_HEIGHT.step)}
+          onClick={() => stepHeight(-BOARD_HEIGHT.step)}
         >
           −
         </button>
@@ -73,7 +79,7 @@ export default function BulletinToolbar({
           value={heightDraft}
           onChange={(e) => setHeightDraft(e.target.value)}
           onBlur={commitDraft}
-          onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur() }}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur() }}
           className="w-16 bg-gray-800 text-gray-100 text-xs text-center rounded px-1 py-1 border border-gray-700 focus:outline-none focus:border-gray-500"
         />
         <button
@@ -81,7 +87,7 @@ export default function BulletinToolbar({
           aria-label="Increase board height"
           className="w-6 h-6 rounded bg-gray-800 text-gray-200 text-sm leading-none disabled:opacity-40"
           disabled={boardHeight >= BOARD_HEIGHT.max}
-          onClick={() => onBoardHeight(boardHeight + BOARD_HEIGHT.step)}
+          onClick={() => stepHeight(BOARD_HEIGHT.step)}
         >
           +
         </button>

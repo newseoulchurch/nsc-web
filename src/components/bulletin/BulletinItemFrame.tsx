@@ -106,6 +106,8 @@ export default function BulletinItemFrame({
       {mode === "edit" && selected && (
         <>
           <button
+            type="button"
+            aria-label="Delete item"
             style={{
               position: "absolute",
               top: -10,
@@ -129,6 +131,7 @@ export default function BulletinItemFrame({
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onDelete?.() }}
+            onDoubleClick={(e) => e.stopPropagation()}
           >
             ×
           </button>
@@ -136,21 +139,25 @@ export default function BulletinItemFrame({
           <div
             style={dot({ top: -28, left: "50%", transform: "translateX(-50%)", cursor: "grab" })}
             onPointerDown={(e) => { e.stopPropagation(); onRotateStart?.(e) }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
 
           <div
             style={dot({ right: -6, top: "50%", transform: "translateY(-50%)", cursor: "e-resize" })}
             onPointerDown={(e) => { e.stopPropagation(); onResizeHStart?.(e) }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
 
           <div
             style={dot({ bottom: -6, left: "50%", transform: "translateX(-50%)", cursor: "s-resize" })}
             onPointerDown={(e) => { e.stopPropagation(); onResizeVStart?.(e) }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
 
           <div
             style={dot({ bottom: -6, right: -6, cursor: lockAspect ? "se-resize" : "nwse-resize" })}
             onPointerDown={(e) => { e.stopPropagation(); onCornerStart?.(e) }}
+            onDoubleClick={(e) => e.stopPropagation()}
           />
         </>
       )}
