@@ -2,6 +2,7 @@ import { put } from "@vercel/blob"
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { IMAGE_LIMIT } from "@/components/bulletin/noteOptions"
 
 function supabase() {
   return createClient(
@@ -33,9 +34,12 @@ export async function POST(request: Request) {
   }
 
   const db = supabase()
-  const { count } = await db.from("bulletin_items").select("id", { count: "exact", head: true })
-  if ((count ?? 0) >= 15) {
-    return NextResponse.json({ error: "Board is full (max 15 items)" }, { status: 400 })
+  const { count } = await db
+    .from("bulletin_items")
+    .select("id", { count: "exact", head: true })
+    .eq("type", "image")
+  if ((count ?? 0) >= IMAGE_LIMIT) {
+    return NextResponse.json({ error: `Board is full (max ${IMAGE_LIMIT} images)` }, { status: 400 })
   }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
@@ -50,7 +54,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await db
     .from("bulletin_items")
-    .insert({ image_url: blob.url, x, y, width: DEFAULT_W, height: DEFAULT_H, rotation, z_index: count ?? 0 })
+    .insert({ type: "image", image_url: blob.url, x, y, width: DEFAULT_W, height: DEFAULT_H, rotation, z_index: count ?? 0 })
     .select()
     .single()
 
