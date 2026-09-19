@@ -1,33 +1,39 @@
 "use client"
 
-import type { BulletinItem as Item } from "@/types/bulletin"
+import type { BulletinItem } from "@/types/bulletin"
 
 type Props = {
-  item: Item
+  item: BulletinItem
   mode: "view" | "edit"
   selected?: boolean
+  lockAspect: boolean
   onSelect?: () => void
   onDelete?: () => void
   onDragStart?: (e: React.PointerEvent) => void
-  onResizeStart?: (e: React.PointerEvent) => void
+  onCornerStart?: (e: React.PointerEvent) => void
   onResizeHStart?: (e: React.PointerEvent) => void
   onResizeVStart?: (e: React.PointerEvent) => void
   onRotateStart?: (e: React.PointerEvent) => void
   onViewClick?: (rect: { x: number; y: number; width: number; height: number }) => void
+  onDoubleClick?: () => void
+  children: React.ReactNode
 }
 
-export default function BulletinItem({
+export default function BulletinItemFrame({
   item,
   mode,
   selected = false,
+  lockAspect,
   onSelect,
   onDelete,
   onDragStart,
-  onResizeStart,
+  onCornerStart,
   onResizeHStart,
   onResizeVStart,
   onRotateStart,
   onViewClick,
+  onDoubleClick,
+  children,
 }: Props) {
   const style: React.CSSProperties = {
     position: "absolute",
@@ -35,12 +41,13 @@ export default function BulletinItem({
     top: item.y,
     width: item.width,
     height: item.height,
+    zIndex: item.z_index,
     transform: `rotate(${item.rotation}deg)`,
     boxShadow: selected
       ? "0 0 0 1px #fff, 0 0 0 2.5px rgba(0,0,0,0.3), 4px 6px 16px rgba(0,0,0,0.45)"
       : "4px 6px 16px rgba(0,0,0,0.45)",
     borderRadius: 2,
-    cursor: mode === "edit" ? "grab" : "pointer",
+    cursor: mode === "edit" ? "grab" : onViewClick ? "pointer" : "default",
     userSelect: "none",
     touchAction: "none",
   }
@@ -67,19 +74,14 @@ export default function BulletinItem({
     <div
       style={style}
       onPointerDown={handlePointerDown}
-      onClick={mode === "view" ? (e) => {
+      onDoubleClick={mode === "edit" ? onDoubleClick : undefined}
+      onClick={mode === "view" && onViewClick ? (e) => {
         const r = e.currentTarget.getBoundingClientRect()
-        onViewClick?.({ x: r.x, y: r.y, width: r.width, height: r.height })
+        onViewClick({ x: r.x, y: r.y, width: r.width, height: r.height })
       } : undefined}
     >
       <div style={{ width: "100%", height: "100%", overflow: "hidden", borderRadius: 2 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={item.image_url}
-          alt="Announcement"
-          style={{ width: "100%", height: "100%", objectFit: "fill", display: "block" }}
-          draggable={false}
-        />
+        {children}
       </div>
 
       {/* Push pin — view mode only (edit mode uses the rotate handle in the same spot) */}
@@ -103,7 +105,6 @@ export default function BulletinItem({
 
       {mode === "edit" && selected && (
         <>
-          {/* Delete */}
           <button
             style={{
               position: "absolute",
@@ -132,28 +133,24 @@ export default function BulletinItem({
             ×
           </button>
 
-          {/* Rotate handle */}
           <div
             style={dot({ top: -28, left: "50%", transform: "translateX(-50%)", cursor: "grab" })}
             onPointerDown={(e) => { e.stopPropagation(); onRotateStart?.(e) }}
           />
 
-          {/* Right-edge resize (width only) */}
           <div
             style={dot({ right: -6, top: "50%", transform: "translateY(-50%)", cursor: "e-resize" })}
             onPointerDown={(e) => { e.stopPropagation(); onResizeHStart?.(e) }}
           />
 
-          {/* Bottom-edge resize (height only) */}
           <div
             style={dot({ bottom: -6, left: "50%", transform: "translateX(-50%)", cursor: "s-resize" })}
             onPointerDown={(e) => { e.stopPropagation(); onResizeVStart?.(e) }}
           />
 
-          {/* Corner resize (aspect-ratio locked) */}
           <div
-            style={dot({ bottom: -6, right: -6, cursor: "se-resize" })}
-            onPointerDown={(e) => { e.stopPropagation(); onResizeStart?.(e) }}
+            style={dot({ bottom: -6, right: -6, cursor: lockAspect ? "se-resize" : "nwse-resize" })}
+            onPointerDown={(e) => { e.stopPropagation(); onCornerStart?.(e) }}
           />
         </>
       )}
