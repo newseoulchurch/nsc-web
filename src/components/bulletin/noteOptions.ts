@@ -27,6 +27,7 @@ export const NOTE_DEFAULTS: Pick<
 
 export const IMAGE_LIMIT = 15
 export const NOTE_LIMIT = 10
+export const NOTE_CONTENT_MAX = 500
 
 export const CANVAS_W = 1200
 

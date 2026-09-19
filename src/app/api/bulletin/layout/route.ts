@@ -1,12 +1,14 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { isNoteFont, parseBulletinItem } from "@/types/bulletin"
+import { parseBulletinItem } from "@/types/bulletin"
 import type { BulletinItem } from "@/types/bulletin"
+import { loadBoard } from "@/lib/bulletin"
 import {
   BOARD_HEIGHT,
   HEX_COLOR_RE,
   IMAGE_LIMIT,
+  NOTE_CONTENT_MAX,
   NOTE_LIMIT,
   NOTE_SIZES,
 } from "@/components/bulletin/noteOptions"
@@ -26,7 +28,7 @@ function validateItem(raw: unknown): BulletinItem | null {
   if (!item) return null
   if (!UUID_RE.test(item.id)) return null
   if (item.type === "text") {
-    if (!isNoteFont(item.font)) return null
+    if (item.content.length > NOTE_CONTENT_MAX) return null
     if (!(NOTE_SIZES as readonly number[]).includes(item.font_size)) return null
     if (!HEX_COLOR_RE.test(item.text_color) || !HEX_COLOR_RE.test(item.note_color)) return null
   }
@@ -60,19 +62,8 @@ function toRow(item: BulletinItem) {
 }
 
 export async function GET() {
-  const db = supabase()
-  const [{ data: rows, error: itemsError }, { data: settings }] = await Promise.all([
-    db.from("bulletin_items").select("*").order("created_at", { ascending: true }),
-    db.from("bulletin_settings").select("board_height").eq("id", 1).maybeSingle(),
-  ])
-
-  if (itemsError) return NextResponse.json({ error: itemsError.message }, { status: 500 })
-
-  const items = (rows ?? [])
-    .map((row) => parseBulletinItem(row as Record<string, unknown>))
-    .filter((item): item is BulletinItem => item !== null)
-
-  return NextResponse.json({ items, board_height: settings?.board_height ?? BOARD_HEIGHT.default })
+  const { items, boardHeight } = await loadBoard(supabase())
+  return NextResponse.json({ items, board_height: boardHeight })
 }
 
 export async function POST(request: Request) {
@@ -112,7 +103,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many notes" }, { status: 400 })
   }
 
+  const lowest = items.reduce((max, i) => Math.max(max, i.y + i.height), 0)
+  if (board_height < lowest + BOARD_HEIGHT.itemMargin) {
+    return NextResponse.json({ error: "Board height too small for items" }, { status: 400 })
+  }
+
   const db = supabase()
+
+  // Note: the settings upsert runs before the delete-and-reinsert of items so that,
+  // if something fails partway through, it's the board height (not the items) that
+  // is left half-saved — the safer thing to have half-saved.
+  // Acceptable trade-off for this feature's scale.
+  const { error: settingsError } = await db
+    .from("bulletin_settings")
+    .upsert({ id: 1, board_height })
+  if (settingsError) return NextResponse.json({ error: settingsError.message }, { status: 500 })
 
   const { error: deleteError } = await db
     .from("bulletin_items")
@@ -120,17 +125,10 @@ export async function POST(request: Request) {
     .neq("id", "00000000-0000-0000-0000-000000000000")
   if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 })
 
-  // Note: delete is already committed; insert failure leaves the board empty.
-  // Acceptable trade-off for this feature's scale.
   if (items.length > 0) {
     const { error: insertError } = await db.from("bulletin_items").insert(items.map(toRow))
     if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
-
-  const { error: settingsError } = await db
-    .from("bulletin_settings")
-    .upsert({ id: 1, board_height })
-  if (settingsError) return NextResponse.json({ error: settingsError.message }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }

@@ -1,30 +1,15 @@
 import { createClient } from "@supabase/supabase-js"
 import BulletinBoard from "@/components/bulletin/BulletinBoard"
-import { BOARD_HEIGHT } from "@/components/bulletin/noteOptions"
-import { parseBulletinItem } from "@/types/bulletin"
-import type { BulletinItem } from "@/types/bulletin"
+import { loadBoard } from "@/lib/bulletin"
 
 export const dynamic = "force-dynamic"
 
-async function getBoard(): Promise<{ items: BulletinItem[]; boardHeight: number }> {
+export default async function BulletinPage() {
   const db = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-  const [{ data: rows }, { data: settings }] = await Promise.all([
-    db.from("bulletin_items").select("*").order("created_at", { ascending: true }),
-    db.from("bulletin_settings").select("board_height").eq("id", 1).maybeSingle(),
-  ])
-
-  const items = (rows ?? [])
-    .map((row) => parseBulletinItem(row as Record<string, unknown>))
-    .filter((item): item is BulletinItem => item !== null)
-
-  return { items, boardHeight: settings?.board_height ?? BOARD_HEIGHT.default }
-}
-
-export default async function BulletinPage() {
-  const { items, boardHeight } = await getBoard()
+  const { items, boardHeight } = await loadBoard(db)
 
   return (
     <div className="w-full pb-20">

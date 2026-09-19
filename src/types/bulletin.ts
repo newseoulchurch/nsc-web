@@ -44,15 +44,15 @@ function isFiniteNumber(value: unknown): value is number {
 function parseBase(row: Record<string, unknown>): BulletinItemBase | null {
   const { id, x, y, width, height, rotation, z_index, created_at } = row
   if (typeof id !== "string" || typeof created_at !== "string") return null
-  if (![x, y, width, height, rotation, z_index].every(isFiniteNumber)) return null
+  if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(width) || !isFiniteNumber(height) || !isFiniteNumber(rotation) || !isFiniteNumber(z_index)) return null
   return {
     id,
-    x: x as number,
-    y: y as number,
-    width: width as number,
-    height: height as number,
-    rotation: rotation as number,
-    z_index: z_index as number,
+    x,
+    y,
+    width,
+    height,
+    rotation,
+    z_index,
     created_at,
   }
 }
