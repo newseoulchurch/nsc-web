@@ -73,6 +73,17 @@ function clampBoardHeight(requested: number, items: Item[]): { value: number; me
   return { value: bounded, message: null }
 }
 
+function centeredNoteY(container: HTMLDivElement | null, scale: number, boardHeight: number): number {
+  if (!container) {
+    return Math.round((boardHeight - NOTE_DEFAULTS.height) / 2)
+  }
+  const rect = container.getBoundingClientRect()
+  const top = Math.max(0, -rect.top) / scale
+  const bottom = Math.min(rect.height, window.innerHeight - rect.top) / scale
+  const centered = (top + bottom) / 2 - NOTE_DEFAULTS.height / 2
+  return Math.min(boardHeight - NOTE_DEFAULTS.height, Math.max(0, centered))
+}
+
 export default function BulletinBoard({ initialItems, initialBoardHeight, mode }: Props) {
   const [items, setItems] = useState<Item[]>(initialItems)
   const [boardHeight, setBoardHeight] = useState(initialBoardHeight)
@@ -233,7 +244,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
       width: NOTE_DEFAULTS.width,
       height: NOTE_DEFAULTS.height,
       x: Math.round((CANVAS_W - NOTE_DEFAULTS.width) / 2),
-      y: Math.round((boardHeight - NOTE_DEFAULTS.height) / 2),
+      y: centeredNoteY(containerRef.current, scale, boardHeight),
       rotation: 0,
       z_index: maxZ + 1,
       created_at: new Date().toISOString(),
