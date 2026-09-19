@@ -9,7 +9,7 @@ import BulletinMobileList from "./BulletinMobileList"
 import BulletinLightbox from "./BulletinLightbox"
 import BulletinToolbar from "./BulletinToolbar"
 import BulletinFormatBar from "./BulletinFormatBar"
-import { handFont } from "./handFont"
+import { noteFontVariables } from "./noteFonts"
 import { BOARD_HEIGHT, CANVAS_W, NOTE_DEFAULTS, NOTE_LIMIT } from "./noteOptions"
 
 type Props = {
@@ -243,6 +243,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
       font_size: NOTE_DEFAULTS.font_size,
       text_color: NOTE_DEFAULTS.text_color,
       note_color: NOTE_DEFAULTS.note_color,
+      text_align: NOTE_DEFAULTS.text_align,
       width: NOTE_DEFAULTS.width,
       height: NOTE_DEFAULTS.height,
       x: Math.round((CANVAS_W - NOTE_DEFAULTS.width) / 2),
@@ -297,7 +298,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
   const visibleItems = items.filter((item) => isVisible(item, mode))
 
   return (
-    <div className={`w-full ${handFont.variable}`}>
+    <div className={`w-full ${noteFontVariables}`}>
       {mode === "edit" && (
         <>
           <BulletinToolbar
