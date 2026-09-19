@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { BOARD_HEIGHT, IMAGE_LIMIT, NOTE_LIMIT } from "./noteOptions"
 
 type Props = {
@@ -33,7 +33,7 @@ export default function BulletinToolbar({
   const notesFull = noteCount >= NOTE_LIMIT
 
   const [heightDraft, setHeightDraft] = useState(String(boardHeight))
-  useEffect(() => { setHeightDraft(String(boardHeight)) }, [boardHeight])
+  useLayoutEffect(() => { setHeightDraft(String(boardHeight)) }, [boardHeight])
 
   function commitDraft() {
     const parsed = Number.parseInt(heightDraft, 10)
