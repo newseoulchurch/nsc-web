@@ -2,7 +2,7 @@ import { put } from "@vercel/blob"
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { BOARD_HEIGHT, IMAGE_LIMIT } from "@/components/bulletin/noteOptions"
+import { BOARD_HEIGHT, CANVAS_W, IMAGE_LIMIT } from "@/components/bulletin/noteOptions"
 
 function supabase() {
   return createClient(
@@ -12,7 +12,6 @@ function supabase() {
 }
 
 const MAX_BYTES = 10 * 1024 * 1024 // 10MB
-const CANVAS_W = 1200
 const DEFAULT_W = 220
 const DEFAULT_H = 280
 

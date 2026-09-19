@@ -27,6 +27,8 @@ function validateItem(raw: unknown): BulletinItem | null {
   const item = parseBulletinItem(raw as Record<string, unknown>)
   if (!item) return null
   if (!UUID_RE.test(item.id)) return null
+  if (Number.isNaN(Date.parse(item.created_at))) return null
+  if (!Number.isInteger(item.z_index)) return null
   if (item.type === "text") {
     if (item.content.length > NOTE_CONTENT_MAX) return null
     if (!(NOTE_SIZES as readonly number[]).includes(item.font_size)) return null

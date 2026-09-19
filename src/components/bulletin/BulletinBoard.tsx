@@ -173,6 +173,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
 
   const handlePointerUp = useCallback(() => {
     dragRef.current = null
+    setHeightMessage(null)
     window.removeEventListener("pointermove", handlePointerMove)
     window.removeEventListener("pointerup", handlePointerUp)
   }, [handlePointerMove])
@@ -204,6 +205,7 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
   }
 
   async function handleUpload(file: File) {
+    const maxZ = items.reduce((max, i) => Math.max(max, i.z_index), 0)
     const formData = new FormData()
     formData.append("file", file)
     const res = await fetch("/api/bulletin/upload", { method: "POST", body: formData })
@@ -224,9 +226,9 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
       let w = MAX_W
       let h = Math.round(w / ratio)
       if (h > MAX_H) { h = MAX_H; w = Math.round(h * ratio) }
-      setItems((prev) => [...prev, { ...newItem, width: w, height: h }])
+      setItems((prev) => [...prev, { ...newItem, width: w, height: h, z_index: maxZ + 1 }])
     }
-    img.onerror = () => { URL.revokeObjectURL(url); setItems((prev) => [...prev, newItem]) }
+    img.onerror = () => { URL.revokeObjectURL(url); setItems((prev) => [...prev, { ...newItem, z_index: maxZ + 1 }]) }
     img.src = url
   }
 
@@ -277,11 +279,13 @@ export default function BulletinBoard({ initialItems, initialBoardHeight, mode }
   }
 
   async function handleSave() {
+    const { value: height } = clampBoardHeight(boardHeight, items)
+    if (height !== boardHeight) setBoardHeight(height)
     setSaving(true)
     const res = await fetch("/api/bulletin/layout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items, board_height: boardHeight }),
+      body: JSON.stringify({ items, board_height: height }),
     })
     setSaving(false)
     if (!res.ok) {

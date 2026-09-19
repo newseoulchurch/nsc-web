@@ -29,10 +29,6 @@ export type BulletinTextItem = BulletinItemBase & {
 
 export type BulletinItem = BulletinImageItem | BulletinTextItem
 
-export type BulletinSettings = {
-  board_height: number
-}
-
 const NOTE_FONT_VALUES: readonly NoteFont[] = ["circular", "serif", "hand", "mono"]
 
 export function isNoteFont(value: unknown): value is NoteFont {
