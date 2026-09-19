@@ -173,7 +173,7 @@ Notes render at their saved position, rotation, and colors, pin included, and do
 
 The mobile grid is replaced by a reading-order list:
 
-1. Sort into rows: sort by `y`; walk the list and start a new row whenever an item's `y` is more than 40 canvas units below the first item of the current row. Sort each row by `x`. Flatten.
+1. Sort into rows: sort by `y`; walk the list and start a new row whenever an item's `y` is more than half the shorter of its own height and the row anchor's height below the first item of the current row. Sort each row by `x`. Flatten.
 2. Walk the flattened list, emitting blocks: each text note is a full-width block; consecutive images are collected into one two-column grid.
 3. Note block: `note_color` background, chosen font and `text_color`, font size × 0.7 (min 14), padding 12, `white-space: pre-wrap`, `transform: rotate(rotation deg)` clamped to ±4° so a strongly rotated header does not overflow the column, the same paper shadow as image cards.
 4. Image cells are unchanged from today (3/4 aspect, lightbox tap in view mode).

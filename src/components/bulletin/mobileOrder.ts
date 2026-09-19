@@ -1,10 +1,13 @@
 import type { BulletinImageItem, BulletinItem, BulletinTextItem } from "@/types/bulletin"
 
-const ROW_TOLERANCE = 40
-
 export type MobileBlock =
   | { kind: "note"; item: BulletinTextItem }
   | { kind: "images"; items: BulletinImageItem[] }
+
+function sameRow(anchor: BulletinItem, item: BulletinItem): boolean {
+  const tolerance = Math.min(anchor.height, item.height) / 2
+  return item.y - anchor.y <= tolerance
+}
 
 export function sortReadingOrder(items: BulletinItem[]): BulletinItem[] {
   const byY = [...items].sort((a, b) => a.y - b.y)
@@ -12,7 +15,7 @@ export function sortReadingOrder(items: BulletinItem[]): BulletinItem[] {
 
   for (const item of byY) {
     const row = rows[rows.length - 1]
-    if (row && item.y - row[0].y <= ROW_TOLERANCE) {
+    if (row && sameRow(row[0], item)) {
       row.push(item)
     } else {
       rows.push([item])
