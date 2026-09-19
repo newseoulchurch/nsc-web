@@ -253,3 +253,11 @@ src/app/api/bulletin/upload/route.ts               modified: explicit type
 src/app/bulletin/page.tsx                          modified: settings query, parse
 src/app/admin/bulletin/page.tsx                    modified: settings query, parse
 ```
+
+## Addendum 2026-09-19: note alignment, more fonts, safer save
+
+**Alignment.** Text items gain `text_align: "left" | "center" | "right"`, applied to the whole note through `noteTextStyle`, so the desktop canvas, the inline textarea, and the mobile list all honor it. The format bar shows three icon buttons (`aria-pressed` on the active one) between the size select and the swatches. Stored in a nullable `text_align` column (`docs/superpowers/migrations/2026-09-19-bulletin-note-align.sql`); `parseBulletinItem` treats a missing or unknown value as `left`, so existing notes need no backfill. New notes default to `left`.
+
+**Fonts.** Four added to `NOTE_FONTS`: Bebas Neue (display caps), Playfair Display (formal serif), Gaegu (handwriting, Korean + Latin), Black Han Sans (heavy display, Korean + Latin). All load through `next/font/google` in `src/components/bulletin/noteFonts.ts` (renamed from `handFont.ts`), which exports one `noteFontVariables` class string applied on the board wrapper. The two Korean faces set `preload: false` because their glyph sets are large. Caveat has no Hangul, which is why Gaegu was added.
+
+**Save order.** The layout POST no longer deletes every row before inserting. It upserts the submitted rows and then deletes rows whose ids were not submitted. A failed write (for example, code deployed before its migration) now leaves the board intact instead of empty.
