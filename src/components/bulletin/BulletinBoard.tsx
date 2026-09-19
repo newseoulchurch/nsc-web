@@ -81,7 +81,7 @@ function centeredNoteY(container: HTMLDivElement | null, scale: number, boardHei
   const top = Math.max(0, -rect.top) / scale
   const bottom = Math.min(rect.height, window.innerHeight - rect.top) / scale
   const centered = (top + bottom) / 2 - NOTE_DEFAULTS.height / 2
-  return Math.min(boardHeight - NOTE_DEFAULTS.height, Math.max(0, centered))
+  return Math.round(Math.min(boardHeight - NOTE_DEFAULTS.height, Math.max(0, centered)))
 }
 
 export default function BulletinBoard({ initialItems, initialBoardHeight, mode }: Props) {
