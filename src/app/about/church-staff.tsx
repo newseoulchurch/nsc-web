@@ -30,12 +30,12 @@ export default function ChurchStaff() {
       image: "/assets/images/about/church-staff/IsakGif.gif",
     },
 
-    {
-      id: 4,
-      name: "Carmen",
-      description: "Kids' Ministry",
-      image: "/assets/images/about/church-staff/CarmenGif.gif",
-    },
+    // {
+    //   id: 4,
+    //   name: "Carmen",
+    //   description: "Kids' Ministry",
+    //   image: "/assets/images/about/church-staff/CarmenGif.gif",
+    // },
     {
       id: 5,
       name: "Monica Oh",
@@ -65,6 +65,12 @@ export default function ChurchStaff() {
       name: "Nabi Sanni",
       description: "Welcoming / Followup",
       image: "/assets/images/about/church-staff/NabiGif.gif",
+    },
+    {
+      id: 24,
+      name: "Rachel Hwang",
+      description: "Admin GSN",
+      image: "/assets/images/about/church-staff/RachelGif.gif",
     },
 
     // {
@@ -103,12 +109,12 @@ export default function ChurchStaff() {
     //   description: "Welcoming",
     //   image: "/assets/images/about/church-staff/EmilyGif.gif",
     // },
-    {
-      id: 17,
-      name: "Ellie Moon",
-      description: "Media",
-      image: "/assets/images/about/church-staff/EllieGif.gif",
-    },
+    // {
+    //   id: 17,
+    //   name: "Ellie Moon",
+    //   description: "Media",
+    //   image: "/assets/images/about/church-staff/EllieGif.gif",
+    // },
     {
       id: 18,
       name: "Enzo Choi",
@@ -132,6 +138,18 @@ export default function ChurchStaff() {
       name: "Chanhee Lee",
       description: "Website",
       image: "/assets/images/about/church-staff/ChanheeGif.gif",
+    },
+    {
+      id: 25,
+      name: "Hiwan Bayru",
+      description: "Lighting",
+      image: "/assets/images/about/church-staff/HiwanGif.gif",
+    },
+    {
+      id: 26,
+      name: "Grace Bae",
+      description: "Welcoming",
+      image: "/assets/images/about/church-staff/GraceBaeGif.gif",
     },
   ];
   return (
