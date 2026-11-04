@@ -3,18 +3,26 @@ import PolaroidCard from "./PolaroidCard";
 
 interface YearSectionProps {
   year: number;
+  theme?: string;
   events: WallOfFaithEvent[];
 }
 
-export default function YearSection({ year, events }: YearSectionProps) {
+export default function YearSection({ year, theme, events }: YearSectionProps) {
   return (
     <section className="mb-20">
       {/* Year heading */}
-      <div className="relative flex items-center justify-center my-12">
-        <div className="absolute inset-x-0 h-px bg-[#d9c9b0]" />
-        <span className="relative bg-[#f5ede0] px-6 text-4xl font-black italic tracking-[8px] text-[#8b7355] opacity-60 select-none">
-          {year}
-        </span>
+      <div className="flex flex-col items-center my-12 gap-2">
+        <div className="relative flex items-center justify-center w-full">
+          <div className="absolute inset-x-0 h-px bg-[#d9c9b0]" />
+          <span className="relative bg-[#f5ede0] px-6 text-4xl font-black italic tracking-[8px] text-[#8b7355] opacity-60 select-none">
+            {year}
+          </span>
+        </div>
+        {theme && (
+          <p className="text-sm uppercase tracking-[3px] text-[#a0896a] font-semibold text-center">
+            {theme}
+          </p>
+        )}
       </div>
 
       {/* Events */}
@@ -29,7 +37,7 @@ export default function YearSection({ year, events }: YearSectionProps) {
               }`}
             >
               {/* Polaroid */}
-              <div className="flex-shrink-0 flex justify-center w-full sm:w-auto">
+              <div className="flex justify-center">
                 <PolaroidCard event={event} index={i} />
               </div>
 
@@ -39,13 +47,13 @@ export default function YearSection({ year, events }: YearSectionProps) {
                   isLeft ? "text-left" : "sm:text-right text-left"
                 }`}
               >
-                <p className="text-xs text-[#a0896a] uppercase tracking-widest mb-2">
+                <p className="text-sm text-[#a0896a] uppercase tracking-widest mb-2">
                   {event.date}
                 </p>
-                <h3 className="text-xl font-black text-[#3d2f1e] mb-3 leading-tight">
+                <h3 className="text-2xl font-black text-[#3d2f1e] mb-3 leading-tight">
                   {event.title}
                 </h3>
-                <p className="text-sm text-[#6b5540] leading-relaxed">
+                <p className="text-base text-[#6b5540] leading-relaxed">
                   {event.description}
                 </p>
                 {event.youtubeUrl && (
@@ -53,7 +61,7 @@ export default function YearSection({ year, events }: YearSectionProps) {
                     href={event.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-3 text-xs font-bold text-[#cc0000] hover:underline"
+                    className="inline-block mt-3 text-sm font-bold text-[#cc0000] hover:underline"
                   >
                     ▶ Watch on YouTube
                   </a>

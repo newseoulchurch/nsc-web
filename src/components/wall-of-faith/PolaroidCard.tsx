@@ -14,8 +14,8 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
 
   return (
     <div
-      className="cursor-pointer select-none"
-      style={{ perspective: "600px", width: "100%", maxWidth: "260px" }}
+      className="cursor-pointer select-none w-[220px] sm:w-[260px] flex-shrink-0"
+      style={{ perspective: "600px" }}
       onClick={() => setFlipped((f) => !f)}
       onMouseEnter={() => setFlipped(true)}
       onMouseLeave={() => setFlipped(false)}
@@ -55,7 +55,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
             style={{
               textAlign: "center",
               marginTop: "10px",
-              fontSize: "11px",
+              fontSize: "13px",
               color: "#8b7355",
               fontStyle: "italic",
               fontWeight: 600,
@@ -85,7 +85,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
         >
           <p
             style={{
-              fontSize: "9px",
+              fontSize: "11px",
               color: "#a0896a",
               textTransform: "uppercase",
               letterSpacing: "1.5px",
@@ -96,7 +96,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
           </p>
           <h3
             style={{
-              fontSize: "13px",
+              fontSize: "15px",
               fontWeight: 800,
               color: "#3d2f1e",
               lineHeight: 1.2,
@@ -107,7 +107,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
           </h3>
           <p
             style={{
-              fontSize: "10px",
+              fontSize: "12px",
               color: "#6b5540",
               lineHeight: 1.55,
               flex: 1,
@@ -123,7 +123,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               style={{
-                fontSize: "10px",
+                fontSize: "12px",
                 color: "#cc0000",
                 fontWeight: 700,
                 textDecoration: "none",

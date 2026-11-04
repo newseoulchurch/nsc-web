@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { wallOfFaithEvents, WallOfFaithEvent } from "@/data/wall-of-faith";
+import { wallOfFaithEvents, yearThemes, WallOfFaithEvent } from "@/data/wall-of-faith";
 import YearSection from "@/components/wall-of-faith/YearSection";
 
 export const metadata: Metadata = {
@@ -42,6 +42,7 @@ export default function WallOfFaithPage() {
           <YearSection
             key={year}
             year={year}
+            theme={yearThemes[year]}
             events={grouped.get(year)!}
           />
         ))}

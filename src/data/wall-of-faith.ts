@@ -9,6 +9,12 @@ export interface WallOfFaithEvent {
   order: number;
 }
 
+export const yearThemes: Record<number, string> = {
+  2023: "Made New to Make New",
+  2024: "Walking Toward the Call, Calling All Who Walk",
+  2025: "Made for More",
+};
+
 export const wallOfFaithEvents: WallOfFaithEvent[] = [
   // ── 2023 ──────────────────────────────────────────
   {
