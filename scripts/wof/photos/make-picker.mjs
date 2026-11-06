@@ -9,6 +9,8 @@ import { execFileSync } from "node:child_process";
 const ROOT = resolve(".wof-photos");
 const read = (f, d) => (existsSync(join(ROOT, f)) ? JSON.parse(readFileSync(join(ROOT, f), "utf8")) : d);
 const suggest = read("suggest.json", {});
+// Saved picks win over suggestions, so reopening the picker shows Chan's choices.
+for (const [slug, path] of Object.entries(read("picks.json", {}))) suggest[slug] = path.split("/").pop();
 const sources = read("sources.json", {}); // { slug: "drive" | "nas" | "mixed" }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
