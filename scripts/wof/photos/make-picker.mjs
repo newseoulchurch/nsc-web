@@ -45,8 +45,12 @@ input:checked+img{border-color:#e07b00}.nas{position:absolute;top:6px;left:6px;b
 ${rows}
 <script>
 function clearRow(n){document.querySelectorAll('input[name="'+n+'"]').forEach(i=>i.checked=false)}
-function save(){const p={};document.querySelectorAll('input:checked').forEach(i=>p[i.name]=i.value);
-const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));
+async function save(){const p={};document.querySelectorAll('input:checked').forEach(i=>p[i.name]=i.value);
+const text=JSON.stringify(p,null,2);
+// Chrome/Edge: pick the save location (choose .wof-photos so nothing has to be moved out of Downloads).
+if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:'picks.json',types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+const w=await h.createWritable();await w.write(text);await w.close();alert('Saved '+Object.keys(p).length+' picks');return}catch(e){if(e.name==='AbortError')return}}
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
 a.download='picks.json';a.click()}
 </script>`);
 console.log(`picker: ${join(ROOT, "picker.html")} (${slugs.length} events)`);
