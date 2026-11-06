@@ -81,7 +81,18 @@ export const ADDITIONS: Addition[] = [
   // src: Drive photo folder "2025.04.06_Baptism"
   { year: 2025, sortDate: "2025-04-06", dateLabel: "Apr 6, 2025", title: "Baptism", milestone: null, significance: null,
     description: "Members were baptized and publicly declared their faith in Jesus before the church." },
-  // 2026 drafts appended here (sources cited per entry)
+  // src: ~/chanos/workspaces/nsc/be-ready/vision/summary.md:8,14-18 (Sermon 1, Sept 13)
+  { year: 2026, sortDate: "2026-09-13", dateLabel: "Sep 13, 2026", title: "Be Ready Season Begins", milestone: null, significance: null,
+    description: "The Be Ready season opened with “The Be Ready Manifesto,” the first message of the Acts series “Legacy,” introducing four pillars: Reach, Regions, Recalibrate, and Record." },
+  // src: ~/chanos/workspaces/nsc/be-ready/data/raw/meeting-notes/2026-09-06.md:9-16; be-ready/recalibrate/HANDOFF.md:93
+  { year: 2026, sortDate: "2026-09-20", dateLabel: "Sep 20, 2026", title: "Fall Festival", milestone: null, significance: null,
+    description: "NSC welcomed neighbors and newcomers from many nations to the Fall Festival, sharing food and fellowship together at the church." },
+  // src: ~/chanos/workspaces/nsc/be-ready/retreat/trading-cards/NOTES.md:3; be-ready/docs/superpowers/specs/2026-10-07-prayer-figure-cards-design.md
+  { year: 2026, sortDate: "2026-10-08", dateLabel: "Oct 8–11, 2026", title: "Surrender Retreat", milestone: null, significance: null,
+    description: "A camping-style fasting retreat at Dure Monastery, with prayer stations drawn from the lives of the Church Fathers." },
+  // src: ~/chanos/workspaces/nsc/dt/dt3/HANDOFF.md:6,13
+  { year: 2026, sortDate: "2026-10-24", dateLabel: "Oct 24, 2026", title: "DT Phase 3 Begins", milestone: null, significance: null,
+    description: "Phase 3 of Discipleship Training began under the theme “Covering.”" },
 ];
 
 export function seedEvents(): EventInput[] {
