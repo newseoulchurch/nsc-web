@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   slugify, groupTimeline, eventInputSchema, eventPatchSchema, yearInputSchema,
-  fromRow, toRowValues, eventFormPayload, describeIssues, type WofEvent,
+  fromRow, toRowValues, eventFormPayload, describeIssues, slugWithSuffix, isWofBlob, type WofEvent,
 } from "./model.ts";
 
 const ev = (o: Partial<WofEvent>): WofEvent => ({
@@ -55,7 +55,7 @@ test("groupTimeline keeps an event whose year has no theme row, with empty theme
 const valid = {
   slug: "2024-good-friday-service", year: 2024, sortDate: "2024-03-29",
   dateLabel: "Mar 29, 2024", title: "Good Friday Service", description: "d",
-  milestone: "Washing feet", significance: "s", imageUrl: null, youtubeUrl: null, needsReview: false,
+  milestone: "Washing feet", significance: "s", youtubeUrl: null, needsReview: false,
 };
 
 test("eventInputSchema accepts a valid event and turns empty strings into null", () => {
@@ -66,9 +66,9 @@ test("eventInputSchema accepts a valid event and turns empty strings into null",
 });
 
 test("eventInputSchema treats omitted optional fields as null (admin create omits imageUrl)", () => {
-  const { imageUrl: _i, youtubeUrl: _y, milestone: _m, significance: _s, ...rest } = valid;
+  const { youtubeUrl: _y, milestone: _m, significance: _s, ...rest } = valid;
   const r = eventInputSchema.parse(rest);
-  assert.equal(r.imageUrl, null);
+  assert.equal(r.youtubeUrl, null);
   assert.equal(r.milestone, null);
 });
 
@@ -85,7 +85,7 @@ test("eventInputSchema enforces limits and formats", () => {
   bad({ year: 2021 });
   bad({ sortDate: "2024-02-30" });
   bad({ sortDate: "Mar 29" });
-  bad({ imageUrl: "http://insecure.example/x.jpg" });
+  bad({ imageUrl: "https://a.public.blob.vercel-storage.com/bulletin/x.jpg" }); // photos only via the upload route
   bad({ youtubeUrl: "javascript:alert(1)" });
   bad({ unknownField: 1 });
 });
@@ -122,13 +122,34 @@ test("describeIssues names the failing fields", () => {
   assert.equal(describeIssues(undefined), "");
 });
 
+test("eventPatchSchema rejects imageUrl so a PATCH can't point an event at someone else's blob", () => {
+  assert.equal(eventPatchSchema.safeParse({ imageUrl: "https://x.public.blob.vercel-storage.com/wall-of-faith/a.jpg" }).success, false);
+});
+
+test("slugWithSuffix numbers repeats and stays within 80 chars", () => {
+  assert.equal(slugWithSuffix("2026-event", 1), "2026-event");
+  assert.equal(slugWithSuffix("2026-event", 2), "2026-event-2");
+  const long = "2026-" + "a".repeat(75);
+  assert.equal(slugWithSuffix(long, 12).length <= 80, true);
+  assert.match(slugWithSuffix(long, 12), /-12$/);
+});
+
+test("isWofBlob only accepts Vercel Blob URLs under /wall-of-faith/", () => {
+  assert.equal(isWofBlob("https://igmgr3ejlj7zobya.public.blob.vercel-storage.com/wall-of-faith/2024-x-1a2b3c4d.jpg"), true);
+  assert.equal(isWofBlob("https://igmgr3ejlj7zobya.public.blob.vercel-storage.com/bulletin/flyer.jpg"), false);
+  assert.equal(isWofBlob("https://evil.example/.blob.vercel-storage.com/wall-of-faith/x.jpg"), false);
+  assert.equal(isWofBlob("https://x.public.blob.vercel-storage.com.evil.io/wall-of-faith/x.jpg"), false);
+  assert.equal(isWofBlob(null), false);
+  assert.equal(isWofBlob("not a url"), false);
+});
+
 test("yearInputSchema", () => {
   assert.equal(yearInputSchema.safeParse({ year: 2026, theme: "Be · Ready · Be Ready" }).success, true);
   assert.equal(yearInputSchema.safeParse({ year: 2026, theme: "" }).success, false);
 });
 
 test("row mapping round-trips", () => {
-  const row = { id: "1", ...toRowValues(eventInputSchema.parse(valid)) };
+  const row = { id: "1", image_url: null, ...toRowValues(eventInputSchema.parse(valid)) };
   const e = fromRow(row);
   assert.equal(e.sortDate, "2024-03-29");
   assert.equal(e.dateLabel, "Mar 29, 2024");

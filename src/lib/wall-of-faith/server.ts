@@ -20,5 +20,4 @@ export function badRequest(error: unknown) {
   );
 }
 
-export const isOurBlob = (url: string | null | undefined): url is string =>
-  !!url && url.includes(".blob.vercel-storage.com/");
+export { isWofBlob as isOurBlob } from "./model";

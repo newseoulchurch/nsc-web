@@ -11,6 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 import { blobKey, parsePicks } from "./lib.mjs";
 
 const dry = process.argv.includes("--dry-run");
+const force = process.argv.includes("--force");
 const ROOT = resolve(".wof-photos");
 const OUT = join(ROOT, "_out");
 mkdirSync(OUT, { recursive: true });
@@ -19,7 +20,7 @@ for (const k of ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "BLOB_READ_WRITE_T
   if (!process.env[k]) throw new Error(`${k} missing — run with --env-file=.env.local`);
 }
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-const ours = (u) => !!u && u.includes(".blob.vercel-storage.com/");
+const ours = (u) => { try { const x = new URL(u); return x.hostname.endsWith(".public.blob.vercel-storage.com") && x.pathname.startsWith("/wall-of-faith/"); } catch { return false; } };
 
 let ok = 0, same = 0, failed = 0;
 for (const [slug, src] of Object.entries(picks)) {
@@ -32,6 +33,10 @@ for (const [slug, src] of Object.entries(picks)) {
   const bytes = readFileSync(out);
   const key = blobKey(slug, bytes);
   if (row.image_url?.endsWith(`/${key}`)) { console.log(`same  ${slug}`); same++; continue; }
+  // A photo set some other way (admin upload, older pick) is never overwritten without --force.
+  if (row.image_url && !row.image_url.includes(`/wall-of-faith/${slug}-`) && !force) {
+    console.log(`keep  ${slug}: has a photo set elsewhere (${row.image_url.split("/").pop()}); --force to replace`); same++; continue;
+  }
   if (dry) { console.log(`would upload ${slug} → ${key} (${Math.round(bytes.length / 1024)} KB)`); continue; }
   const blob = await put(key, bytes, { access: "public", contentType: "image/jpeg", addRandomSuffix: false, allowOverwrite: true });
   const { error: upErr } = await db.from("wall_of_faith_events")

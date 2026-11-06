@@ -47,7 +47,8 @@ const eventShape = {
   description: z.preprocess((v) => (v == null ? "" : v), z.string().trim().max(1000)),
   milestone: optText(60),
   significance: optText(400),
-  imageUrl: httpsUrl,
+  // imageUrl is not accepted: only the upload route (and the photo script) set image_url,
+  // so a PATCH can never point an event at a blob it doesn't own.
   youtubeUrl: httpsUrl,
   needsReview: z.boolean(),
 };
@@ -68,7 +69,7 @@ export const yearInputSchema = z.object({
 const COLUMN: Record<keyof EventInput, keyof WofRow> = {
   slug: "slug", year: "year", sortDate: "sort_date", dateLabel: "date_label", title: "title",
   description: "description", milestone: "milestone", significance: "significance",
-  imageUrl: "image_url", youtubeUrl: "youtube_url", needsReview: "needs_review",
+  youtubeUrl: "youtube_url", needsReview: "needs_review",
 };
 
 export function toRowPatch(p: EventPatch): Partial<WofRow> {
@@ -77,8 +78,26 @@ export function toRowPatch(p: EventPatch): Partial<WofRow> {
   return out as Partial<WofRow>;
 }
 
-export function toRowValues(i: EventInput): Omit<WofRow, "id"> {
-  return toRowPatch(i) as Omit<WofRow, "id">;
+export function toRowValues(i: EventInput): Omit<WofRow, "id" | "image_url"> {
+  return toRowPatch(i) as Omit<WofRow, "id" | "image_url">;
+}
+
+// "2026-event" → "2026-event-2" for repeats; the base is trimmed so the result stays ≤ 80 chars.
+export function slugWithSuffix(base: string, n: number): string {
+  if (n <= 1) return base;
+  const tail = `-${n}`;
+  return base.slice(0, 80 - tail.length).replace(/-+$/, "") + tail;
+}
+
+// True only for Vercel Blob URLs in the wall-of-faith/ folder: never delete a bulletin or events image.
+export function isWofBlob(url: string | null | undefined): url is string {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && u.hostname.endsWith(".public.blob.vercel-storage.com") && u.pathname.startsWith("/wall-of-faith/");
+  } catch {
+    return false;
+  }
 }
 
 // Body the admin form sends: every editable field, never id (path param) or imageUrl (upload route).
