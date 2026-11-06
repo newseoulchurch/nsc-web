@@ -31,7 +31,7 @@ export default function YearSection({ group }: { group: WofYearGroup }) {
               <div className="flex justify-center">
                 <PolaroidCard event={event} index={i} />
               </div>
-              <div className={`flex-1 min-w-0 break-words ${isLeft ? "text-left" : "sm:text-right text-left"}`}>
+              <div className={`flex-1 min-w-0 [overflow-wrap:anywhere] ${isLeft ? "text-left" : "sm:text-right text-left"}`}>
                 <p className="text-sm text-[#a0896a] uppercase tracking-widest mb-2">{event.dateLabel}</p>
                 {event.milestone && (
                   <div className="mb-2">

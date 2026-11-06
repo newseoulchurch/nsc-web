@@ -4,7 +4,7 @@ import MilestoneBadge from "../MilestoneBadge";
 
 export default function SpineDetail({ event }: { event: WofEvent }) {
   return (
-    <div className="relative z-10 mt-4 ml-[80px] sm:mx-auto sm:max-w-[520px] rounded-2xl border border-[#e8dccb] bg-[#fffaf4] p-4 sm:p-6 break-words">
+    <div className="relative z-10 mt-4 ml-[80px] sm:mx-auto sm:max-w-[520px] rounded-2xl border border-[#e8dccb] bg-[#fffaf4] p-4 sm:p-6 [overflow-wrap:anywhere]">
       <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl">
         <EventPhoto event={event} sizes="(max-width: 640px) 90vw, 520px" />
       </div>

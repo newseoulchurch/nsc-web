@@ -7,7 +7,7 @@ type Props = { event: WofEvent; side: "left" | "right"; open: boolean; onToggle:
 
 export default function SpineNode({ event, side, open, onToggle }: Props) {
   const heading = (
-    <div className={`min-w-0 break-words ${side === "left" ? "sm:text-right" : "sm:text-left"}`}>
+    <div className={`min-w-0 [overflow-wrap:anywhere] ${side === "left" ? "sm:text-right" : "sm:text-left"}`}>
       <p className="text-[11px] uppercase tracking-[1.5px] text-[#a0896a]">{event.dateLabel}</p>
       {event.milestone && (
         <div className="my-1">
@@ -17,7 +17,7 @@ export default function SpineNode({ event, side, open, onToggle }: Props) {
       <h3 className="text-lg sm:text-xl font-bold text-[#3d2f1e] leading-tight">{event.title}</h3>
     </div>
   );
-  const body = <p className="min-w-0 break-words text-sm text-[#6b5540] leading-relaxed">{event.description}</p>;
+  const body = <p className="min-w-0 [overflow-wrap:anywhere] text-sm text-[#6b5540] leading-relaxed">{event.description}</p>;
 
   return (
     <div>

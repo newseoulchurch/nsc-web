@@ -42,6 +42,8 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
             padding: "8px 8px 32px",
             boxShadow: "2px 4px 16px rgba(0,0,0,0.15)",
             transform: `rotate(${rotation})`,
+            overflow: "hidden",
+            overflowWrap: "anywhere",
           }}
         >
           <div style={{ position: "relative", width: "100%", aspectRatio: "1", overflow: "hidden" }}>
@@ -77,6 +79,7 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
             flexDirection: "column",
             gap: "6px",
             overflow: "hidden",
+            overflowWrap: "anywhere",
           }}
         >
           <p

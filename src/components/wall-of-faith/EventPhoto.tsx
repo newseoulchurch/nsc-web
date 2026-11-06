@@ -8,8 +8,9 @@ export default function EventPhoto({ event, sizes, className = "", rounded = "no
   const shape = rounded === "full" ? "rounded-full" : "";
   if (!event.imageUrl) {
     return (
-      <div className={`absolute inset-0 flex items-center justify-center p-3 text-center bg-gradient-to-br from-[#d9c9b0] to-[#efe4d3] ${shape} ${className}`}>
-        <span className="text-[#8b7355] text-xs sm:text-sm font-semibold italic leading-snug line-clamp-3 break-words">{event.title}</span>
+      <div className={`absolute inset-0 flex items-center justify-center overflow-hidden text-center bg-gradient-to-br from-[#d9c9b0] to-[#efe4d3] ${rounded === "full" ? "p-2" : "p-3"} ${shape} ${className}`}>
+        {/* keep-all: titles wrap between words (Korean too), never mid-word; overflow is clipped. */}
+        <span className={`text-[#8b7355] font-semibold italic leading-snug line-clamp-3 [word-break:keep-all] ${rounded === "full" ? "text-[10px] sm:text-xs" : "text-xs sm:text-sm"}`}>{event.title}</span>
       </div>
     );
   }
