@@ -1,13 +1,15 @@
 // Client component: rendered only inside WofAdmin ("use client").
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
-import { describeIssues, eventFormPayload, type WofEvent, type WofYear } from "@/lib/wall-of-faith/model";
+import type { WofEvent, WofYear } from "@/lib/wall-of-faith/model";
 import { compressImage } from "./compressImage";
+import { saveEvent } from "./saveEvent";
 
 type Props = {
   event?: WofEvent;
   years: WofYear[];
-  onSaved: (e: WofEvent) => void;
+  // keepOpen: the text saved but the photo didn't; the modal stays open with the error.
+  onSaved: (e: WofEvent, keepOpen: boolean) => void;
   onDeleted: (id: string) => void;
   onClose: () => void;
 };
@@ -19,8 +21,11 @@ const blank = (year: number): Draft => ({
   milestone: null, significance: null, imageUrl: null, youtubeUrl: null, needsReview: true,
 });
 
-export default function EventForm({ event, years, onSaved, onDeleted, onClose }: Props) {
-  const [f, setF] = useState<Draft>(event ?? blank(years.at(-1)?.year ?? new Date().getFullYear()));
+export default function EventForm({ event: initial, years, onSaved, onDeleted, onClose }: Props) {
+  // The saved event once it exists: a new event becomes an edit after its first save,
+  // so a retry after a failed photo PATCHes it instead of POSTing a duplicate (409).
+  const [event, setEvent] = useState(initial);
+  const [f, setF] = useState<Draft>(initial ?? blank(years.at(-1)?.year ?? new Date().getFullYear()));
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -30,34 +35,15 @@ export default function EventForm({ event, years, onSaved, onDeleted, onClose }:
     setBusy(true);
     setErr(null);
     try {
-      // Never send id or imageUrl (strict schema); a new event's slug is derived server-side.
-      const body = { ...eventFormPayload(f), slug: event ? f.slug : "" };
-      const res = await fetch(event ? `/api/wall-of-faith/events/${event.id}` : "/api/wall-of-faith/events", {
-        method: event ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        const fields = describeIssues(json.issues);
-        throw new Error(fields ? `확인 필요: ${fields}` : json.error ?? "저장 실패");
+      const r = await saveEvent(f, event, file, { fetch, compress: compressImage });
+      if (r.saved) {
+        setEvent(r.saved);
+        setF((p) => ({ ...p, slug: r.saved!.slug, imageUrl: r.saved!.imageUrl }));
+        onSaved(r.saved, r.error !== null);
       }
-      let saved: WofEvent = json.event;
-      if (file) {
-        const fd = new FormData();
-        fd.append("file", await compressImage(file));
-        fd.append("eventId", saved.id);
-        const up = await fetch("/api/wall-of-faith/upload", { method: "POST", body: fd });
-        const upJson = await up.json();
-        if (!up.ok) {
-          onSaved(saved); // text is saved; keep the list in sync before reporting the photo error
-          throw new Error(`글은 저장됨, 사진 실패: ${upJson.error}`);
-        }
-        saved = { ...saved, imageUrl: upJson.url };
-      }
-      onSaved(saved);
+      setErr(r.error);
     } catch (e) {
-      setErr((e as Error).message);
+      setErr((e as Error).message || "저장 실패");
     } finally {
       setBusy(false);
     }

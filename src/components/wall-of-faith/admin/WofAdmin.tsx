@@ -108,9 +108,9 @@ export default function WofAdmin({ initialYears, initialEvents }: Props) {
           event={editing === "new" ? undefined : editing}
           years={years}
           onClose={() => setEditing(null)}
-          onSaved={(saved) => {
+          onSaved={(saved, keepOpen) => {
             setEvents((es) => [...es.filter((x) => x.id !== saved.id), saved]);
-            setEditing(null);
+            if (!keepOpen) setEditing(null);
           }}
           onDeleted={(id) => {
             setEvents((es) => es.filter((x) => x.id !== id));
