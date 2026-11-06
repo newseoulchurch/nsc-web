@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { WallOfFaithEvent } from "@/data/wall-of-faith";
+import type { WofEvent } from "@/lib/wall-of-faith/model";
+import EventPhoto from "./EventPhoto";
 
 interface PolaroidCardProps {
-  event: WallOfFaithEvent;
+  event: WofEvent;
   index: number;
 }
 
@@ -43,14 +44,9 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
             transform: `rotate(${rotation})`,
           }}
         >
-          {/* TODO: Replace with <Image src={event.imageUrl} ... /> when imageUrl is populated */}
-          <div
-            style={{
-              width: "100%",
-              aspectRatio: "1",
-              background: "linear-gradient(135deg, #c8b8a0, #ddd0be)",
-            }}
-          />
+          <div style={{ position: "relative", width: "100%", aspectRatio: "1", overflow: "hidden" }}>
+            <EventPhoto event={event} sizes="(max-width: 640px) 220px, 260px" />
+          </div>
           <p
             style={{
               textAlign: "center",
@@ -92,8 +88,13 @@ export default function PolaroidCard({ event, index }: PolaroidCardProps) {
               flexShrink: 0,
             }}
           >
-            {event.date}
+            {event.dateLabel}
           </p>
+          {event.milestone && (
+            <p style={{ fontSize: "10px", color: "#8b7355", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", flexShrink: 0 }}>
+              ✦ {event.milestone}
+            </p>
+          )}
           <h3
             style={{
               fontSize: "15px",

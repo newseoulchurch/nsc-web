@@ -1,13 +1,9 @@
-import { WallOfFaithEvent } from "@/data/wall-of-faith";
+import type { WofYearGroup } from "@/lib/wall-of-faith/model";
+import MilestoneBadge from "./MilestoneBadge";
 import PolaroidCard from "./PolaroidCard";
 
-interface YearSectionProps {
-  year: number;
-  theme?: string;
-  events: WallOfFaithEvent[];
-}
-
-export default function YearSection({ year, theme, events }: YearSectionProps) {
+export default function YearSection({ group }: { group: WofYearGroup }) {
+  const { year, theme, events } = group;
   return (
     <section className="mb-20">
       {/* Year heading */}
@@ -19,9 +15,7 @@ export default function YearSection({ year, theme, events }: YearSectionProps) {
           </span>
         </div>
         {theme && (
-          <p className="text-sm uppercase tracking-[3px] text-[#a0896a] font-semibold text-center">
-            {theme}
-          </p>
+          <p className="text-sm uppercase tracking-[3px] text-[#a0896a] font-semibold text-center">{theme}</p>
         )}
       </div>
 
@@ -32,30 +26,23 @@ export default function YearSection({ year, theme, events }: YearSectionProps) {
           return (
             <div
               key={event.id}
-              className={`flex flex-col sm:flex-row items-center gap-8 sm:gap-12 ${
-                isLeft ? "sm:flex-row" : "sm:flex-row-reverse"
-              }`}
+              className={`flex flex-col items-center gap-8 sm:gap-12 ${isLeft ? "sm:flex-row" : "sm:flex-row-reverse"}`}
             >
-              {/* Polaroid */}
               <div className="flex justify-center">
                 <PolaroidCard event={event} index={i} />
               </div>
-
-              {/* Text */}
-              <div
-                className={`flex-1 ${
-                  isLeft ? "text-left" : "sm:text-right text-left"
-                }`}
-              >
-                <p className="text-sm text-[#a0896a] uppercase tracking-widest mb-2">
-                  {event.date}
-                </p>
-                <h3 className="text-2xl font-black text-[#3d2f1e] mb-3 leading-tight">
-                  {event.title}
-                </h3>
-                <p className="text-base text-[#6b5540] leading-relaxed">
-                  {event.description}
-                </p>
+              <div className={`flex-1 min-w-0 break-words ${isLeft ? "text-left" : "sm:text-right text-left"}`}>
+                <p className="text-sm text-[#a0896a] uppercase tracking-widest mb-2">{event.dateLabel}</p>
+                {event.milestone && (
+                  <div className="mb-2">
+                    <MilestoneBadge text={event.milestone} />
+                  </div>
+                )}
+                <h3 className="text-2xl font-black text-[#3d2f1e] mb-3 leading-tight">{event.title}</h3>
+                <p className="text-base text-[#6b5540] leading-relaxed">{event.description}</p>
+                {event.significance && (
+                  <p className="mt-3 text-base italic text-[#8b7355] leading-relaxed">{event.significance}</p>
+                )}
                 {event.youtubeUrl && (
                   <a
                     href={event.youtubeUrl}
