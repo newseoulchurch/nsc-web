@@ -13,10 +13,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: [
-      "i.ytimg.com",
-      "img.youtube.com",
-      "igmgr3ejlj7zobya.public.blob.vercel-storage.com", // ✅ 실제 Vercel Blob 호스트
+    remotePatterns: [
+      { protocol: "https", hostname: "i.ytimg.com" },
+      { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" }, // Vercel Blob (any store)
     ],
   },
 };
