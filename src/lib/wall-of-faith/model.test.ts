@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   slugify, groupTimeline, eventInputSchema, eventPatchSchema, yearInputSchema,
-  fromRow, toRowValues, type WofEvent,
+  fromRow, toRowValues, eventFormPayload, describeIssues, type WofEvent,
 } from "./model.ts";
 
 const ev = (o: Partial<WofEvent>): WofEvent => ({
@@ -104,6 +104,22 @@ test("eventPatchSchema allows partial updates but keeps the rules", () => {
 test("eventPatchSchema leaves omitted fields out instead of nulling them", () => {
   const r = eventPatchSchema.parse({ title: "New" });
   assert.deepEqual(Object.keys(r), ["title"]);
+});
+
+test("eventFormPayload drops id and imageUrl so an edited event passes the strict schemas", () => {
+  const edited = ev({ id: "60543b3e-e5dd-431f-a89e-a27490648f26", slug: "2024-x", imageUrl: "https://a.public.blob.vercel-storage.com/x.jpg", milestone: "Tag" });
+  const body = eventFormPayload(edited);
+  assert.equal("id" in body, false);
+  assert.equal("imageUrl" in body, false);
+  assert.equal(eventPatchSchema.safeParse(body).success, true);
+  assert.equal(eventInputSchema.safeParse(body).success, true);
+});
+
+test("describeIssues names the failing fields", () => {
+  const r = eventPatchSchema.safeParse({ title: "", youtubeUrl: "http://x" });
+  assert.equal(r.success, false);
+  if (!r.success) assert.match(describeIssues(r.error.flatten()), /title.*youtubeUrl|youtubeUrl.*title/);
+  assert.equal(describeIssues(undefined), "");
 });
 
 test("yearInputSchema", () => {

@@ -81,6 +81,21 @@ export function toRowValues(i: EventInput): Omit<WofRow, "id"> {
   return toRowPatch(i) as Omit<WofRow, "id">;
 }
 
+// Body the admin form sends: every editable field, never id (path param) or imageUrl (upload route).
+export function eventFormPayload(e: Omit<WofEvent, "id"> & { id?: string }): Omit<WofEvent, "id" | "imageUrl"> {
+  return {
+    slug: e.slug, year: e.year, sortDate: e.sortDate, dateLabel: e.dateLabel, title: e.title,
+    description: e.description, milestone: e.milestone, significance: e.significance,
+    youtubeUrl: e.youtubeUrl, needsReview: e.needsReview,
+  };
+}
+
+// "title, youtubeUrl" from a zod flatten() result, for the admin's error line.
+export function describeIssues(issues: unknown): string {
+  const fe = (issues as { fieldErrors?: Record<string, unknown> } | undefined)?.fieldErrors;
+  return fe ? Object.keys(fe).join(", ") : "";
+}
+
 export function slugify(year: number, title: string): string {
   const tail = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   return `${year}-${tail || "event"}`.slice(0, 80);

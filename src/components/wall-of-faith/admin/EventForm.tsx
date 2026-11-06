@@ -1,7 +1,7 @@
 // Client component: rendered only inside WofAdmin ("use client").
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
-import type { WofEvent, WofYear } from "@/lib/wall-of-faith/model";
+import { describeIssues, eventFormPayload, type WofEvent, type WofYear } from "@/lib/wall-of-faith/model";
 import { compressImage } from "./compressImage";
 
 type Props = {
@@ -30,17 +30,18 @@ export default function EventForm({ event, years, onSaved, onDeleted, onClose }:
     setBusy(true);
     setErr(null);
     try {
-      // imageUrl is never sent from the form; photos go through the upload route.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { imageUrl, ...fields } = f;
-      const body = { ...fields, slug: event ? f.slug : "" };
+      // Never send id or imageUrl (strict schema); a new event's slug is derived server-side.
+      const body = { ...eventFormPayload(f), slug: event ? f.slug : "" };
       const res = await fetch(event ? `/api/wall-of-faith/events/${event.id}` : "/api/wall-of-faith/events", {
         method: event ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "저장 실패");
+      if (!res.ok) {
+        const fields = describeIssues(json.issues);
+        throw new Error(fields ? `확인 필요: ${fields}` : json.error ?? "저장 실패");
+      }
       let saved: WofEvent = json.event;
       if (file) {
         const fd = new FormData();
