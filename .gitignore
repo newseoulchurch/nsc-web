@@ -45,3 +45,6 @@ next-env.d.ts
 # local tooling
 .superpowers/
 .playwright-mcp/
+
+# wall of faith photo staging (never commit)
+.wof-photos/
