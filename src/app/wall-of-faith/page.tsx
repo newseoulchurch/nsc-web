@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import YearSection from "@/components/wall-of-faith/YearSection";
+import SpineTimeline from "@/components/wall-of-faith/spine/SpineTimeline";
 import { loadWallOfFaith } from "@/lib/wall-of-faith/load";
 import { adminDb } from "@/lib/wall-of-faith/server";
 
@@ -22,11 +22,7 @@ export default async function WallOfFaithPage() {
       </section>
 
       {/* Timeline */}
-      <div className="rounded-[18px] px-4 sm:px-12 py-8 mt-8 mb-[64px] sm:mb-[97px]" style={{ background: "#f5ede0" }}>
-        {groups.map((g) => (
-          <YearSection key={g.year} group={g} />
-        ))}
-      </div>
+      <SpineTimeline groups={groups} />
     </div>
   );
 }
